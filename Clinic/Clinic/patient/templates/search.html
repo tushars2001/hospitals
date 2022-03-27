@@ -1,0 +1,531 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% load static %}
+{{error}}
+    <style>
+    .patient_tbl, td, th {
+      border: 1px solid;
+    }
+
+    .patient_tbl {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .visits_tbl{
+        display: none;
+    }
+    </style>
+
+    <script language="JavaScript">
+    {% for patient in data %}
+            var global_patient_id = {{patient.idpatients}};
+    {% endfor %}
+        function getVisits(patient_id){
+            document.getElementById("visit_data_table").innerHTML = '';
+            var jqxhr = $.get( "/patient/visits/", { "patient_id" : patient_id } ,function(data) {
+                if(data.status == "success"){
+                    var myTableDiv = document.getElementById("visit_data_table");
+
+                      var table = document.createElement('TABLE');
+                      table.setAttribute('class', 'patient_tbl');
+
+                      //var tableBody = document.createElement('TBODY');
+                      //table.appendChild(tableBody);
+
+                      var th = document.createElement('TR');
+                        table.appendChild(th);
+                          var td = document.createElement('TH');
+                          td.appendChild(document.createTextNode("Visit Date"));
+                          th.appendChild(td);
+
+                          td = document.createElement('TH');
+                          td.appendChild(document.createTextNode("Notes"));
+                          th.appendChild(td);
+
+                          td = document.createElement('TH');
+                          td.appendChild(document.createTextNode("Prescription"));
+                          th.appendChild(td);
+
+                      for (var i = 0; i < data.data.length; i++) {
+                        var tr = document.createElement('TR');
+                        table.appendChild(tr);
+                          var td = document.createElement('TD');
+                          td.appendChild(document.createTextNode(new Date(data.data[i].visit_date).toDateString()));
+                          var button = document.createElement("button");
+                          button.innerHTML = "Remove Visit";
+                          button.setAttribute('class', 'greenbuttons');
+                          button.setAttribute("onclick", "delete_visit("+data.data[i].idvisits+");");
+                          td.appendChild(button);
+                          tr.appendChild(td);
+
+                          td = document.createElement('TD');
+                          var notes = document.createElement("textarea");
+                          notes.setAttribute("id", "notes_visit_" + data.data[i].idvisits);
+                          notes.cols = 30;
+                          notes.rows = 5;
+                          if (data.data[i].notes != null)
+                            notes.innerHTML = data.data[i].notes;
+                          td.appendChild(notes);
+                          var button = document.createElement("button");
+                          button.innerHTML = "Update";
+                          button.setAttribute('class', 'greenbuttons');
+                          button.setAttribute("onclick", "update_notes_for_visit("+data.data[i].idvisits+");");
+                          td.appendChild(button);
+                          tr.appendChild(td);
+
+                          td = document.createElement('TD');
+                          td.setAttribute("valign","top");
+                          var toggle = document.createElement('div');
+                          toggle.setAttribute("id","rx_" + 'table_add_' + data.data[i].idvisits);
+                          toggle.appendChild(document.createTextNode("+ RX"));
+                          toggle.onclick = function(){
+                            console.log("Toggle");
+                            $("#table_add_" + this.id.split("_").slice(-1)).fadeToggle("fast");
+
+                          }
+                          td.appendChild(toggle);
+
+                           /* HIDDEN TBL FOR ADD */
+                                var table_add = document.createElement('TABLE');
+                                table_add.setAttribute('class', 'patient_tbl');
+                                table_add.setAttribute('id', 'table_add_' + data.data[i].idvisits);
+                                table_add.setAttribute("style","display:none");
+
+                                var th = document.createElement('TR');
+                                table_add.appendChild(th);
+
+                                var td_add = document.createElement('TH');
+                                td_add.appendChild(document.createTextNode("Item"));
+                                th.appendChild(td_add);
+
+                                td_add = document.createElement('TH');
+                                td_add.appendChild(document.createTextNode("Frequency"));
+                                th.appendChild(td_add);
+
+                                td_add = document.createElement('TH');
+                                td_add.appendChild(document.createTextNode("Duration"));
+                                th.appendChild(td_add);
+
+                                td_add = document.createElement('TH');
+                                td_add.appendChild(document.createTextNode("Quantity"));
+                                th.appendChild(td_add);
+
+                                td_add = document.createElement('TH');
+                                td_add.appendChild(document.createTextNode("Notes"));
+                                th.appendChild(td_add);
+
+                                td_add = document.createElement('TH');
+                                td_add.appendChild(document.createTextNode("Cost"));
+                                th.appendChild(td_add);
+
+                                td_add = document.createElement('TH');
+                                td_add.appendChild(document.createTextNode(""));
+                                th.appendChild(td_add);
+
+                                var tr_add = document.createElement('TR');
+                                table_add.appendChild(tr_add);
+
+                                var td_add = document.createElement('TD');
+                                var input = document.createElement('input');
+                                input.setAttribute("type","text");
+                                input.setAttribute("name","medicine_name");
+                                input.onkeyup = function(){
+                                    ls = document.getElementById('livesearch_'+this.parentElement.parentElement.parentElement.id.split("_").splice(-1)[0]
+);
+                                    if(this.value.length > 1){
+                                        $.get( "/medicine/lookup/?keyword="+this.value, function( data ) {
+                                          console.log(data);
+                                          ls.innerHTML = "";
+                                          for (var i = 0; i < data.data.length; i++) {
+                                                var p = document.createElement('p');
+                                                p.innerHTML = data.data[i].name;
+                                                p.onmouseover = function(){
+                                                    this.style = "background-color:yellow; cursor: pointer;";
+                                                }
+                                                p.onmouseout = function(){
+                                                    this.style = "background-color:''";
+                                                }
+                                                p.onclick = function(){
+                                                    this.parentElement.previousElementSibling.value = this.innerHTML;
+                                                    ls.innerHTML = "";
+                                                }
+                                                ls.appendChild(p);
+                                          }
+                                        });
+                                    }
+                                    else{
+                                        ls.innerHTML = "";
+                                    }
+                                }
+                                td_add.appendChild(input);
+
+                                var livesearch = document.createElement('div');
+                                livesearch.setAttribute("id","livesearch_"+data.data[i].idvisits);
+                                td_add.appendChild(livesearch);
+
+                                tr_add.appendChild(td_add);
+
+                                td_add = document.createElement('TD');
+                                input = document.createElement('input');
+                                input.setAttribute("type","number");
+                                input.setAttribute("style","width:50px");
+                                input.setAttribute("name","frequency");
+                                td_add.appendChild(input);
+                                tr_add.appendChild(td_add);
+
+                                td_add = document.createElement('TD');
+                                input = document.createElement('input');
+                                input.setAttribute("type","number");
+                                input.setAttribute("style","width:50px");
+                                input.setAttribute("name","duration");
+                                td_add.appendChild(input);
+                                tr_add.appendChild(td_add);
+
+                                td_add = document.createElement('TD');
+                                input = document.createElement('input');
+                                input.setAttribute("type","text");
+                                input.setAttribute("style","width:50px");
+                                input.setAttribute("name","quantity");
+                                td_add.appendChild(input);
+                                tr_add.appendChild(td_add);
+
+                                td_add = document.createElement('TD');
+                                input = document.createElement('input');
+                                input.setAttribute("type","text");
+                                input.setAttribute("name","notes");
+                                td_add.appendChild(input);
+                                tr_add.appendChild(td_add);
+
+                                td_add = document.createElement('TD');
+                                input = document.createElement('input');
+                                input.setAttribute("type","text");
+                                input.setAttribute("style","width:50px");
+                                input.setAttribute("name","cost");
+                                td_add.appendChild(input);
+                                tr_add.appendChild(td_add);
+
+                                td_add = document.createElement('TD');
+                                input = document.createElement('button');
+                                input.setAttribute("value","Add");
+                                input.innerHTML = "Add";
+                                input.setAttribute('class','greenbuttons');
+                                input.setAttribute("onclick", "add_rx_for_visit("+data.data[i].idvisits+");");
+                                td_add.appendChild(input);
+                                tr_add.appendChild(td_add);
+                                td.appendChild(table_add);
+                            /* ********************* */
+
+                          var prescription = document.createElement("div");
+                          prescription.setAttribute("id", "prescription_visit_" + data.data[i].idvisits);
+                          td.appendChild(prescription);
+                          getPrescription(data.data[i].idvisits);
+                          tr.appendChild(td);
+                      }
+                      myTableDiv.appendChild(table);
+                }
+              console.log(data );
+
+              $("#visits_for_"+global_patient_id).show();
+            })
+              .done(function() {
+                //alert( "second success" );
+              })
+              .fail(function() {
+                console.log( "error" );
+              })
+              .always(function() {
+                //alert( "finished" );
+              });
+            //$("#visits_for_" +  patient_id).fadeToggle("fast");
+        }
+
+        function getPrescription(visit_id){
+            var jqxhr = $.get( "/patient/visits/prescription/", { "visit_id" : visit_id } ,function(data) {
+                if(data.status == "success"){
+                    var myTableDiv = document.getElementById("prescription_visit_" + visit_id);
+                    if(data.data.length){
+                        myTableDiv.innerHTML = '';
+                        var table = document.createElement('TABLE');
+                        table.setAttribute('class', 'rbstable');
+
+                        //var tableBody = document.createElement('TBODY');
+                        //table.appendChild(tableBody);
+
+                        var th = document.createElement('TR');
+                        table.appendChild(th);
+                        var td = document.createElement('TH');
+                        td.appendChild(document.createTextNode("Item"));
+                        th.appendChild(td);
+
+                        td = document.createElement('TH');
+                        td.appendChild(document.createTextNode("Frequency"));
+                        th.appendChild(td);
+
+                        td = document.createElement('TH');
+                        td.appendChild(document.createTextNode("Duration"));
+                        th.appendChild(td);
+
+                        td = document.createElement('TH');
+                        td.appendChild(document.createTextNode("Quantity"));
+                        th.appendChild(td);
+
+                        td = document.createElement('TH');
+                        td.appendChild(document.createTextNode("Notes"));
+                        th.appendChild(td);
+
+                        td = document.createElement('TH');
+                        td.appendChild(document.createTextNode("Cost"));
+                        th.appendChild(td);
+
+                        td = document.createElement('TH');
+                        td.appendChild(document.createTextNode(""));
+                        th.appendChild(td);
+
+                        for (var i = 0; i < data.data.length; i++) {
+                            var tr = document.createElement('TR');
+                            table.appendChild(tr);
+                            var td = document.createElement('TD');
+                            td.appendChild(document.createTextNode(data.data[i].name));
+                            tr.appendChild(td);
+
+                            td = document.createElement('TD');
+                            if(data.data[i].frequency != null)
+                                td.appendChild(document.createTextNode(data.data[i].frequency + " Times"));
+                            tr.appendChild(td);
+
+                            td = document.createElement('TD');
+                            if(data.data[i].duration != null)
+                                td.appendChild(document.createTextNode(data.data[i].duration + " Days"));
+                            tr.appendChild(td);
+
+                            td = document.createElement('TD');
+                            if(data.data[i].quantity != null)
+                                td.appendChild(document.createTextNode(data.data[i].quantity));
+                            tr.appendChild(td);
+
+                            td = document.createElement('TD');
+                            td.appendChild(document.createTextNode(data.data[i].notes));
+                            tr.appendChild(td);
+
+                            td = document.createElement('TD');
+                            cost = document.createElement('span');
+                            cost.innerHTML = "&#8377; "+ data.data[i].cost;
+                            td.appendChild(cost);
+                            //td.appendChild(document.createTextNode("&#8377; "+ data.data[i].cost));
+                            tr.appendChild(td);
+
+                            td = document.createElement('TD');
+                            //td.appendChild(document.createTextNode("X"));
+                            td.innerHTML = "<span onclick='deleterx(" + data.data[i].idprescriptions + ","+data.data[i].idvisit+")'>X</span>";
+                            tr.appendChild(td);
+                        }
+                        myTableDiv.appendChild(table);
+                    }
+                    else{
+                        myTableDiv.innerHTML = "No Prescription Given";
+                    }
+
+                }
+                console.log(data );
+                })
+                .done(function() {
+                //alert( "second success" );
+                })
+                .fail(function() {
+                console.log( "error" );
+                })
+                .always(function() {
+                //alert( "finished" );
+            });
+        }
+
+        function add_rx_for_visit(visit_id){
+            console.log("adding rx for");
+            var fields = $("#table_add_" + visit_id + " input");
+            console.log(fields);
+            var data = {};
+            for(var i=0; i<fields.length; i++){
+                data[fields[i].name] = fields[i].value;
+            }
+            data['visit_id'] = visit_id;
+            if(isNaN(data['cost'])){
+                alert("Cost should be numeric.");
+                return false;
+            }
+            console.log(data);
+            console.log(data);
+            $.ajax({
+              url: "/patient/visits/addrx/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log("success");
+                console.log(response);
+                getPrescription(response.data.visit_id);
+                $("#table_add_" + response.data.visit_id + " input").each(function(){
+                    this.value='';
+                });
+                global_alert("RX Added.",1000)
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+        function deleterx(idprescriptions, idvisit){
+            console.log("deleting rx for");
+            //var fields = $("#table_add_" + visit_id + " input");
+            //console.log(fields);
+            var data = {};
+            //for(var i=0; i<fields.length; i++){
+            //    data[fields[i].name] = fields[i].value;
+            //}
+            data['idprescriptions'] = idprescriptions;
+            data['idvisit'] = idvisit;
+            console.log(data);
+            $.ajax({
+              url: "/patient/visits/deleterx/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log("success");
+                console.log(response);
+                getPrescription(response.data.idvisit);
+                //$("#table_add_" + response.data.visit_id + " input").each(function(){
+                //    this.value='';
+                //});
+                global_alert("RX Deleted.",1000)
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+        function update_notes_for_visit(visit_id){
+            console.log("updating notes");
+            data = {
+                    'visit_id': visit_id, 'notes': document.getElementById('notes_visit_'+visit_id).value
+            };
+            $.ajax({
+              url: "/patient/visits/updateNotes/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log("success");
+                global_alert("Notes Updated.",1000)
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+        function add_new_visit(patient_id){
+            console.log("adding visit");
+            data = {
+                    'patient_id': patient_id
+            };
+            $.ajax({
+              url: "/patient/visits/add/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log("success");
+                getVisits(global_patient_id);
+                global_alert("Added Visit.",1000)
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+        function delete_visit(visit_id){
+            console.log("deleting visit");
+            data = {
+                    'visit_id': visit_id
+            };
+            $.ajax({
+              url: "/patient/visits/delete/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log("success");
+                getVisits(global_patient_id);
+                global_alert("Deleted Visit.",1000)
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+    </script>
+
+    <table id="patient_tbl" class="patient_tbl">
+        <tr>
+            <th></th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>History</th>
+            <th>Visits</th>
+        </tr>
+        {% for patient in data %}
+        <tr>
+                <td>
+                    <form method="get" action="/patient/add/">
+                        {% csrf_token %}
+                        <input type="hidden" name="idpatients" value="{{patient.idpatients}}">
+                        <button type="submit" class="greenbuttons">Edit</button>
+                    </form>
+                </td>
+                <td>
+                    {{patient.idpatients}}
+                </td>
+                <td>
+                    {{patient.first_name}} {{patient.last_name}}
+                </td>
+                <td>
+                    {{patient.gender}}
+                </td>
+                <td>
+                    {{patient.phone}}
+                </td>
+                <td>
+                    {{patient.email}}
+                </td>
+                <td>
+                    {% if patient.address_line_1 != '' %}{{patient.address_line_1}}<br>{% endif %}
+                    {% if patient.address_line_2 != '' %}{{patient.address_line_2}}<br>{% endif %}
+                    {% if patient.address_line_3 != '' %}{{patient.address_line_3}}<br>{% endif %}
+                    {{patient.city}}, {{patient.state}}, {{patient.zip}}
+                </td>
+                <td>
+                    {{patient.history}}
+                </td>
+                <td>
+                    <div onclick='getVisits({{patient.idpatients}});'>Show/Hide</div>
+
+                </td>
+        </tr>
+        <tr class="visits_tbl" id="visits_for_{{patient.idpatients}}">
+            <td colspan="7">
+                <div onclick="add_new_visit('{{patient.idpatients}}');">Add New Visit +</div>
+                <div id="visit_data_table">
+
+                </div>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+
+{% endblock %}

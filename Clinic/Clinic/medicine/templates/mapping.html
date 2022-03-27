@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if request.GET.error %}
+    <p>{{request.GET.error}}</p>
+{% endif %}
+
+{% if status != 'unknown' %}
+    <!--{{status}}
+    {{error}}
+    {{data}}-->
+{% endif %}
+<script language="JavaScript">
+    $( function() {
+
+        $( "#datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',
+        shortYearCutoff: 1,
+        changeMonth: true,
+        changeYear: true,
+        minDate: "-99Y",
+         yearRange: "1900:2030"  });
+      } );
+</script>
+<h3>Medicine Administration</h3>
+<div id="medicine_type">
+    <a href="/medicine/type/">Manage Categories</a>
+</div>
+
+<div id="medicine_type_mapping">
+    <a href="/medicine/mapping/">Category-Items Mapping</a>
+</div>
+
+<div id="medicine_updates">
+    <a href="/medicine/updates/">Manage Medicines</a>
+</div>
+
+<div id="medicine_add">
+    <a href="/medicine/add_items/">Add Medicines/Items</a>
+</div>
+
+<h3><a href="/medicine/type/unmapped/">Map Items</a></h3>
+<p>Map Items: Assign categories to items, eg: Assign 'Homeopathy' to 'Silashia', 'Calca'</p>
+<h3><a href="/medicine/type/mapped/">Update mapped Items</a></h3>
+<p>Update mapped Items: De-Assign categories to items, eg: de-assign 'Homeopathy' to 'Silashia', 'Calca'</p>
+
+{% endblock %}
