@@ -60,6 +60,8 @@ TEMPLATES = [
             os.path.join(BASE_DIR, "Clinic/identity/templates"),
             os.path.join(BASE_DIR, "Clinic/patient/templates"),
             os.path.join(BASE_DIR, "Clinic/medicine/templates"),
+            os.path.join(BASE_DIR, "Clinic/reports/templates"),
+            os.path.join(BASE_DIR, "Clinic/expense/templates"),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

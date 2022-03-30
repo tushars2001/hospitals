@@ -5,44 +5,69 @@
 <table border="1" width="100%" cellspacing="30px" cellpadding="15px">
 
     <tr>
-        <td height="30px" colspan="1">
+        <td height="30px" colspan="2">
             <div style="text-align:center" >
                 <span><h3>Clinic Management System
-                    <button type="button" class="greenbuttons" onclick="window.location='./patient/add/';">+</button></h3></span>
+                    </h3></span>
             </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table class="rbstable">
+                <tr>
+                    <td >
+                        <button style="width:100%" type="button" class="greenbuttons" onclick="window.location='./patient/add/';">Patient Registration</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td >
+                        <button style="width:100%" type="button" class="greenbuttons" onclick="window.location='/medicine/';">Medicine/Inventory Management</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td >
+                        <button style="width:100%" type="button" class="greenbuttons" onclick="window.location='/reports/';">Reporting</button>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td>
+            <table class="rbstable">
+                <tr>
+                    <td height="30px" colspan="2">
+                        <form name="addform" method="post" action="/patient/search/">
+                        {% csrf_token %}
+                            Patient ID: <input type="number" name="patient_id">
+                            <input type="submit" class="greenbuttons" value="Submit">
+                        </form>
+                    </td>
+                </tr>
+                 <tr>
+                    <td height="30px" colspan="2">
+                        <form name="search" method="post" action="/patients/searchByName/">
+                        {% csrf_token %}
+                            Patient First Name: <input type="text" name="first_name"><br>
+                            Patient Last Name: <input type="text" name="last_name">
+                            <input type="submit" class="greenbuttons" value="Search">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td height="30px" colspan="2">
+                        <form name="search" method="post" action="/patients/searchByPhone/">
+                        {% csrf_token %}
+                            Patient Phone #: <input type="text" name="phone"><br>
+                            <input type="submit" class="greenbuttons" value="Search">
+                        </form>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 
     <tr>
-        <td height="30px" colspan="1">
-            <form name="addform" method="post" action="/patient/search/">
-            {% csrf_token %}
-                Patient ID: <input type="number" name="patient_id">
-                <input type="submit" class="greenbuttons" value="Submit">
-            </form>
-        </td>
-    </tr>
-     <tr>
-        <td height="30px" colspan="1">
-            <form name="search" method="post" action="/patients/searchByName/">
-            {% csrf_token %}
-                Patient First Name: <input type="text" name="first_name"><br>
-                Patient Last Name: <input type="text" name="last_name">
-                <input type="submit" class="greenbuttons" value="Search">
-            </form>
-        </td>
-    </tr>
-    <tr>
-        <td height="30px" colspan="1">
-            <form name="search" method="post" action="/patients/searchByPhone/">
-            {% csrf_token %}
-                Patient Phone #: <input type="text" name="phone"><br>
-                <input type="submit" class="greenbuttons" value="Search">
-            </form>
-        </td>
-    </tr>
-    <tr>
-        <td height="30px" colspan="1">
+        <td height="30px" colspan="2">
             Recent Updates:
             <table>
                 <tr>

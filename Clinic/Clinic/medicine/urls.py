@@ -10,6 +10,7 @@ urlpatterns = [
     path('type/mapped/', views.type_mapped),
     path('mapping/', views.mapping),
     path('add_items/', views.add_items),
+    path('add_items/add/', views.add_items_add),
     path('updates/', views.updates),
     path('lookup/', views.lookup),
     # path('search/', get_patient_by_id),

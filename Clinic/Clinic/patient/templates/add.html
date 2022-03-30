@@ -33,7 +33,7 @@
 <form name="addform" method="post" action="">
     {% csrf_token %}
     <input type="hidden" value="{{data.0.idpatients }}" name="idpatients">
-    <table border="0">
+    <table class="rfstables">
         <tr>
             <td colspan="2">
                 <table><tr>
@@ -46,7 +46,7 @@
         </tr>
         <tr>
             <td colspan="2">
-                <table>
+                <table >
                     <tr>
                         <td style="text-align:right">Gender &nbsp;</div></td>
                         <td>

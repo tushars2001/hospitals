@@ -2,6 +2,7 @@ from django.db import models
 from django.db import connection
 from ..home.models import dict_fetchall
 from datetime import datetime, timedelta
+from django.db import connection, transaction, DatabaseError, IntegrityError, OperationalError
 import pdb
 
 
@@ -159,3 +160,41 @@ def map(idmedicine_type, idmedicines):
         cursor.close()
 
     return ''
+
+
+def add_items(names, type):
+    fields = {'name': None, 'type': type}
+    res = {'added': [], 'not_added': []}
+    for i in range(len(names)):
+        fields['name'] = names[i].strip()
+        sql = """
+            INSERT INTO `clinic`.`medicins`
+            (
+                `name`, `type`
+            )
+            VALUES
+            (
+                %(name)s, %(type)s
+            )
+            """
+
+        last_id = "SELECT LAST_INSERT_ID()"
+
+        print(sql)
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, fields)
+                data = cursor.fetchall()
+                cursor.close()
+
+            with connection.cursor() as cursor:
+                cursor.execute(last_id)
+                data = cursor.fetchall()
+                cursor.close()
+            print("!!!! LAST INSERT ID !!!!")
+            idmedicins = data[0][0]
+            res['added'].append(fields['name'] + ": " + str(idmedicins))
+        except DatabaseError as e:
+            res['not_added'].append(fields['name'] + ": " + str(e).split(",")[1].replace("'", ""))
+
+    return res

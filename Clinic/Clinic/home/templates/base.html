@@ -138,6 +138,11 @@
           font-weight: bold;
       }
   </style>
+    <script language="JavaScript">
+      {% if global_alert.show %}
+        global_alert('{{global_alert.message}}', 1000);
+      {% endif %}
+    </script>
 
     <title>Dr Richa's Homeopathy</title>
   </head>
@@ -163,10 +168,15 @@
       {% block content %}
       {% endblock %}
     </div>
-    <div style="width:100%;margin:0 auto;text-align:center;font-size:small;color:grey"><a href="/about/" style="font-size:small;color:grey"> About </a> <a href="/contact/" style="font-size:small;color:grey">Contact</a> &#169; 2020</div>
+    <div style="width:100%;margin:5px 0px 0px 0px;text-align:center;font-size:small;color:grey">
+      <a href="/about/" style="font-size:small;color:grey"> Powered by MedEZ: A Tushar Saxena Initiative </a>
+      &#169; <span id="copyright"></span></div>
     <script>
 
       $(document).ready(function() {
+
+        document.getElementById("copyright").innerHTML = new Date().getFullYear().toString();
+
         // When the user scrolls the page, execute myFunction
         window.onscroll = function() {
           //myFunction()

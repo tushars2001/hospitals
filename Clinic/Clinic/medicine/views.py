@@ -34,6 +34,24 @@ def add_items(request):
     return render(request, "updates.html", res)
 
 
+def add_items_add(request):
+    res = {'status': 'success', 'error': '', 'data': {}}
+    if request.method == 'GET' and 'idmedicine_type' in request.GET \
+            and 'item_names[]' in request.GET and len(request.GET['item_names[]']):
+        if request.GET['idmedicine_type'].isdigit():
+            idmedicine_type = request.GET['idmedicine_type']
+        else:
+            idmedicine_type = None
+        added = models.add_items(request.GET.getlist('item_names[]'), idmedicine_type)
+
+        if not added:
+            res = {'status': 'failure', 'error': 'Some Error Occurred.', 'data': {}}
+        else:
+            res = {'status': 'success', 'error': '', 'data': added}
+
+    return JsonResponse(res)
+
+
 def type(request):
     res = {'status': 'success', 'error': '', 'data': models.get_types()}
     return render(request, "type.html", res)
