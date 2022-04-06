@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if request.GET.error %}
+    <p>{{request.GET.error}}</p>
+{% endif %}
+{% load static %}
+{% if status != 'unknown' %}
+    <!--{{status}}
+    {{error}}
+    {{data}}-->
+{% endif %}
+<script language="JavaScript">
+    $( function() {
+
+        $( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',
+        shortYearCutoff: 1,
+        changeMonth: true,
+        changeYear: true,
+        minDate: "-99Y",
+         yearRange: "1900:2030"  });
+
+        var table = $('#expense_report').DataTable({
+            orderCellsTop: true,
+            fixedHeader: true,
+            pageLength: 50,
+            searching: false
+
+        });
+
+        dt_width = $("#expense_report").width();
+
+        $(".data_cell").css({"max-width": dt_width/10-20, "white-space":"nowrap", 'overflow-y':'scroll','scrollbar-width': 'none'});
+
+        {% if added %}
+            global_alert('Expense Added: {{added}}');
+        {% endif %}
+
+    });
+
+      function check_form(){
+        console.log(this);
+        f = document.forms['addform'];
+        title = f['title'].value;
+        amount = f['amount'].value;
+        paid = f['paid_amount'].value;
+        due = f['due_amount'].value;
+        if (title.length == 0 || amount.length == 0){
+            alert("Title and Amount are mandatory.");
+            return false;
+        }
+        else if (amount != paid + due) {
+            alert("Amount paid + due should match total amount");
+            return false;
+        }
+        else
+            f.submit();
+      }
+
+      function refreshReport(action){
+            if(action == 'F'){ //filter
+                fields = {'filters':{}}
+                categories = $("#catSelect").val();
+                fromDate = $("#fromDate").val();
+                toDate = $("#toDate").val();
+
+                url = "./?categories="+categories+"&fromDate="+fromDate+"&toDate="+toDate;
+
+                window.location = url;
+
+            }
+      }
+</script>
+<style>
+    .data_cell::-webkit-scrollbar { width: 0px; height: 0%; background-color: gray; }
+</style>
+<h4>Expense Administration</h4>
+<h5 onclick="$('#add_expense').fadeToggle()" style="cursor:pointer">Add Expense + </h5>
+
+<div id="add_expense" {% if not data.0.idexpense %} style="display:none;" {% endif %}>
+    <form name="addform" method="post" action="">
+        {% csrf_token %}
+        <input type="hidden" value="{{data.0.idexpense}}" name="idexpense">
+        <table class="rfstables">
+            <tr>
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td style="text-align:left">Title *</td>
+                            <td><input name="title" type="text" value="{{data.0.title}}"></td>
+                        <tr>
+                            <td style="text-align:left">Bill Num</td>
+                            <td><input name="bill_num" type="text" value="{{data.0.bill_num}}"></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left">Expense Date</td>
+                            <td><input name="expense_date" type="text" class="datepicker" value="{{data.0.expense_date|date:'Y-m-d'}}"></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left">Category</td>
+                            <td>
+                                <select name="type" id="idmedicine_type">
+                                    <option value=""></option>
+                                    {% for record in types %}
+                                        <option value="{{record.idmedicine_type}}" {% if record.idmedicine_type == data.0.idmedicine_type %} selected {% endif %}>{{record.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <table >
+                        <tr>
+                               <td style="text-align:right">Total Amount*</td>
+                                <td><input name="amount" type="number" value="{{data.0.amount}}"></td>
+                        </tr>
+                        <tr>
+                               <td style="text-align:right">Amount Paid</td>
+                                <td><input name="paid_amount" type="number" value="{{data.0.paid_amount}}"></td>
+                        </tr>
+                        <tr>
+                               <td style="text-align:right">Amount Due</td>
+                                <td><input name="due_amount" type="number" value="{{data.0.due_amount}}"></td>
+                        </tr>
+                        <tr>
+                               <td style="text-align:right">Due Date</td>
+                               <td><input name="due_date" type="text" class="datepicker" value="{{data.0.due_date|date:'Y-m-d'}}"></td>
+                        </tr>
+                        <tr>
+                               <td style="text-align:right">Responsible</td>
+                                <td><input name="due_on" type="text" value="{{data.0.due_on}}"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <table><tr>
+                        <td style="text-align:right">Notes</td><br>
+                        <td><textarea name="notes" rows="5" cols="50">{{data.0.notes}}</textarea></td>
+                    </tr></table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button type="button" value="Submit" onclick="check_form();" class="greenbuttons">Submit</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<table class="rbstable">
+    <tr>
+        <td>
+            <b>Filters</b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table width="100%">
+                <tr>
+                    <th></th>
+                    <th>
+                        Category
+                    </th>
+
+                    <th>
+                        Expense Date
+                    </th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td><div onclick="refreshReport('F')"><img src="{% static 'images/refresh.png' %}"></div></td>
+                    <td>
+                        <span>
+                            <select name="resources" id="catSelect" class="selectpicker filterReport" multiple data-live-search="true" data-actions-box="true" >
+                                <option value="unassigned">Un-assigned</option>
+                                {% for row in types %}
+                                    <option value="{{row.idmedicine_type}}" data-tokens="{{row.idmedicine_type}},{{row.name}}">{{row.name}}</option>
+                                {% endfor   %}
+                            </select>
+                        </span>
+                    </td>
+
+                    <td>
+                        <span>
+                            <input type="text" placeholder="From" name="fromDate" id="fromDate" class="datepicker filterReport" style="width:99px">
+                            <input style="width:99px" placeholder="To" class="datepicker filterReport" type="text" name="toDate" id="toDate">
+                        </span>
+                    </td>
+                    <td><div onclick="refreshReport('F')"><img src="{% static 'images/refresh.png' %}"></div></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<div>
+    <table id="expense_report" style="font-size:small">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Expense Date</th>
+                <th>Amount</th>
+                <th>Paid</th>
+                <th>Due</th>
+                <th>Due Date</th>
+                <th>Due on</th>
+                <th>Bill No</th>
+                <th>Record Created</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for record in report.data %}
+            <tr>
+                <td>E</td>
+                <td><div class="data_cell">{{record.title}}</div></td>
+                <td><div class="data_cell">{{record.name}}</div></td>
+                <td><div class="data_cell">{{record.expense_date|date:'d-M-Y'}}</div></td>
+                <td><div class="data_cell">&#8377;{{record.amount}}</div></td>
+                <td><div class="data_cell">&#8377;{{record.paid_amount}}</div></td>
+                <td><div class="data_cell">&#8377;{{record.due_amount}}</div></td>
+                <td><div class="data_cell">{{record.due_date|date:'d-M-Y'}}</div></td>
+                <td><div class="data_cell">{{record.due_on}}</div></td>
+                <td><div class="data_cell">{{record.bill_num}}</div></td>
+                <td><div class="data_cell">{{record.dt_created|date:'d-M-Y'}}</div></td>
+                <td>N</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+
+                <th><div class="data_cell">&#8377; {{report.summary.0.amount}}</div></th>
+                <th><div class="data_cell">&#8377; {{report.summary.0.paid_amount}}</div></th>
+                <th><div class="data_cell">&#8377; {{report.summary.0.due_amount}}</div></th>
+
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}
