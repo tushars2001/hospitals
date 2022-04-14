@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% if request.GET.error %}
+    <p>{{request.GET.error}}</p>
+{% endif %}
+{% if status != 'unknown' %}
+    <!--{{status}}
+    {{error}}
+    {{data}}-->
+{% endif %}
+<script>
+    $( function() {
+        $( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',
+        shortYearCutoff: 1,
+        changeMonth: true,
+        changeYear: true,
+        minDate: "-99Y",
+         yearRange: "1900:2030"  });
+    });
+
+
+</script>
+<h3>Reporting</h3>
+<p><a href="/reports/revenue/">Revenue</a></p>
+<p><a href="/reports/expense">Expense</a></p>
+<p><a href="/reports/profit-loss/">Profit/Loss</a></p>
+
+<h5>Profit/Loss Report</h5>
+
+{{revenue}}
+<br><br>
+{{expense}}
+<br><br>
+{{filters}}
+
+<table class="rbstable">
+    <tr>
+        <td>
+            <b>Filters</b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table width="100%">
+                <tr>
+                    <th></th>
+                    <th>
+                        Category
+                    </th>
+
+                    <th>
+                        Expense Date
+                    </th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td><div onclick="refreshReport('F')"><img src="{% static 'images/refresh.png' %}"></div></td>
+                    <td>
+                        <span>
+                            <select name="resources" id="catSelect" class="selectpicker filterReport" multiple data-live-search="true" data-actions-box="true" >
+                                <option value="unassigned">Un-assigned</option>
+                                {% for row in types %}
+                                    <option value="{{row.idmedicine_type}}" data-tokens="{{row.idmedicine_type}},{{row.name}}">{{row.name}}</option>
+                                {% endfor   %}
+                            </select>
+                        </span>
+                    </td>
+
+                    <td>
+                        <span>
+                            <input type="text" value="{{filters.fromDate}}" placeholder="From" name="fromDate" id="fromDate" class="datepicker filterReport" >
+                            <input value="{{filters.toDate}}"  placeholder="To" class="datepicker filterReport" type="text" name="toDate" id="toDate">
+                        </span>
+                    </td>
+                    <td><div onclick="refreshReport('F')"><img src="{% static 'images/refresh.png' %}"></div></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+{% endblock %}

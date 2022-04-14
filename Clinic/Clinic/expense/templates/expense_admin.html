@@ -220,7 +220,7 @@
         <tbody>
         {% for record in report.data %}
             <tr>
-                <td>E</td>
+                <td><a href="./?idexpense={{record.idexpense}}">E</a></td>
                 <td><div class="data_cell">{{record.title}}</div></td>
                 <td><div class="data_cell">{{record.name}}</div></td>
                 <td><div class="data_cell">{{record.expense_date|date:'d-M-Y'}}</div></td>
@@ -231,7 +231,7 @@
                 <td><div class="data_cell">{{record.due_on}}</div></td>
                 <td><div class="data_cell">{{record.bill_num}}</div></td>
                 <td><div class="data_cell">{{record.dt_created|date:'d-M-Y'}}</div></td>
-                <td>N</td>
+                <td title="{{record.notes}}" style="cursor:pointer">N</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -255,4 +255,5 @@
         </tfoot>
     </table>
 </div>
+
 {% endblock %}

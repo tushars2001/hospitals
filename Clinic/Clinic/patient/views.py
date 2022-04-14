@@ -3,6 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from . import models
 from django.http import HttpResponse, JsonResponse
 import pdb
+from django.utils.html import escape
 
 
 def add(request):
@@ -223,3 +224,33 @@ def add_visits(request):
         res['error'] = 'Invalid Data provided.'
 
     return JsonResponse(res)
+
+
+def print_prescription(request):
+    res = {'status': 'success', 'error': '', 'data': {}}
+
+    if request.method == 'GET' and 'idvisits' in request.GET and request.GET['idvisits'].isdigit()\
+            and 'idpatients' in request.GET and request.GET['idpatients'].isdigit():
+        res['data']['prescription_info'] = models.get_prescription_by_visit(request.GET['idvisits'])
+        res['data']['patient_info'] = models.get_patient_by_id(request.GET['idpatients'])
+        res['data']['visit_info'] = models.get_visit_by_visit_id(request.GET['idvisits'])
+    else:
+        res['status'] = 'failure'
+        res['error'] = "invalid request"
+
+    return render(request, "prescription.html", res)
+
+
+def print_summary(request):
+    res = {'status': 'success', 'error': '', 'data': {}}
+
+    if request.method == 'GET' and 'idpatients' in request.GET and request.GET['idpatients'].isdigit():
+        res['data']['patient_info'] = models.get_patient_by_id(request.GET['idpatients'])
+        res['data']['visits_info'] = models.get_visits_by_id(request.GET['idpatients'])
+        res['data']['prescriptions_info'] = models.get_prescriptions_by_patient(request.GET['idpatients'])
+    else:
+        res['status'] = 'failure'
+        res['error'] = "invalid request"
+
+    return render(request, "patient_summary.html", res)
+

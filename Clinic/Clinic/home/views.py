@@ -17,4 +17,7 @@ def about(request):
     return render(request, "about.html")
 
 
+@staff_member_required(login_url='/identity/')
+def schedule(request):
+    return render(request, "schedule.html")
 

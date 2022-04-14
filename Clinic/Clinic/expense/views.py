@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from ..medicine.models import get_types
 from . import models
+from ..reports.models import get_expense_data as get_data, get_expense_raw_data as get_raw_data
 import pdb
 
 
@@ -18,8 +19,8 @@ def admin(request):
     if r.method == 'GET' and 'categories' in r.GET and 'fromDate' in r.GET and 'toDate' in r.GET:
         #Filters
         filters = {'categories': r.GET['categories'], 'fromDate': r.GET['fromDate'], 'toDate': r.GET['toDate'] }
-        res['report'] = models.get_data(filters)
+        res['report'] = get_data(filters)
     else:
-        res['report'] = models.get_raw_data()
+        res['report'] = get_raw_data()
 
     return render(request, "expense_admin.html", res)

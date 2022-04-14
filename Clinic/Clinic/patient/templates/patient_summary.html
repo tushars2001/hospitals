@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dr. Richa's Homeopathy</title>
+    <style>
+     body {
+       width: 230mm;
+       height: 100%;
+       margin: 0 auto;
+       padding: 0;
+       font-size: 12pt;
+     }
+     .text-center {
+        text-align: center;
+     }
+     .pres_tbl {
+        width: 100%;
+        border-collapse: collapse;
+     }
+     .pres_tbl td, .pres_tbl th{
+        border: 1px solid;
+        text-align: left;
+        padding: 5px;
+     }
+    </style>
+    <script>
+        window.print();
+    </script>
+</head>
+<body>
+{% load static %}
+<div class="container">
+      <div class="row justify-content-center">
+        <div class="col-8">
+          <h1 class="mt-2 text-center"><a href="/"><img src="{% static 'images/DrRichaLogo.png' %}"></a></h1>
+          <hr class="mt-0 mb-4">
+        </div>
+        <div>
+            <table width="100%">
+                <tr>
+                    <td><b>Summary Date:</b> <span style="text-decoration: underline">{% now "d-M-Y" %}</span></td>
+                    <td style="text-align:right">Dr. Richa Jauhari</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align:right">
+                        BHMS, DRCH, FMC
+                    </td>
+                </tr>
+            </table>
+        </div>
+      </div>
+        <div class="row justify-content-center">
+            <div class="col-8" id="main_data">
+                <br>
+                <table style="border: 0px solid; width:100%">
+                    <tr style="border: 1px solid; width:100%">
+                        <th>Patient ID:</th>
+                        <td>{{data.patient_info.0.idpatients}}</td>
+                        <th>Patient Name:</th>
+                        <td>{{data.patient_info.0.first_name}} {{data.patient_info.0.last_name}}</td>
+                        <th>Patient DoB:</th>
+                        <td>{{data.patient_info.0.dob|default_if_none:""}}</td>
+                    </tr>
+                </table>
+                <br>
+                <div>
+                    <b>Initial Notes:</b>
+                    {{data.patient_info.0.history}}
+                </div>
+                {% for visit in data.visits_info %}
+                    <br>
+                    <hr class="mt-0 mb-4">
+                    <div>
+                        <b>Visit Date:</b>
+                        {{visit.visit_date|date:'d-M-Y'}}
+                    </div>
+                    <div>
+                        <b>Visit Notes:</b>
+                        {{visit.notes}}
+                    </div>
+                    <h4>Prescription:</h4>
+                    <table style="width:100%;" class="pres_tbl">
+                        <tr>
+                            <th>
+                                Item
+                            </th>
+                            <th>
+                                Frequency
+                            </th>
+                            <th>
+                                Duration
+                            </th>
+                            <th>
+                                Quantity
+                            </th>
+                            <th>
+                                Notes
+                            </th>
+                        </tr>
+
+                        {% for prescription_info in data.prescriptions_info %}
+                            {% if prescription_info.visit_id == visit.idvisits %}
+
+                                {% for record in prescription_info.prescription %}
+                                    <tr>
+                                        <td>
+                                            {{record.name}}
+                                        </td>
+                                         <td>
+                                            {{record.frequency|default_if_none:""}}
+                                             {% if record.frequency %}
+                                             Times
+                                             {% endif %}
+                                        </td>
+                                         <td>
+                                            {{record.duration|default_if_none:""}}
+                                             {% if record.duration %}
+                                             Days
+                                             {% endif %}
+                                        </td>
+                                         <td>
+                                            {{record.quantity|default_if_none:""}}
+                                        </td>
+                                         <td>
+                                            {{record.notes|default_if_none:""}}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                {% endfor %}
+            </div>
+        </div>
+      {% block content %}
+      {% endblock %}
+</div>
+
+</body>
+</html>

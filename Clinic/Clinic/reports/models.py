@@ -43,7 +43,7 @@ def get_raw_data():
 def get_data(filters, grouping):
     where = "where 1=1 "
 
-    if 'categories' in filters and len(filters['categories']):
+    if 'categories' in filters and filters['categories'] and len(filters['categories']):
         categories = filters['categories'].split(',')
         where = where + " and (1=2 "
         for i in range(len(categories)):
@@ -65,7 +65,7 @@ def get_data(filters, grouping):
     """
     group_by = []
     group_by_clause = ""
-    if len(grouping):
+    if grouping and len(grouping):
         fields = 'sum(p.cost) as cost'
         if 'category' in grouping and grouping['category']:
             fields = fields + ",mt.idmedicine_type, mt.`name` as category "
@@ -142,3 +142,106 @@ def insert_imports(type, name, price, short_composition):
 
     return True
 
+
+def get_expense_raw_data():
+    sql = """
+    SELECT e.`idexpense`,
+    e.`idmedicine_type`,
+    e.`title`,
+    e.`bill_num`,
+    e.`expense_date`,
+    e.`amount`,
+    e.`paid_amount`,
+    e.`due_amount`,
+    e.`due_on`,
+    e.`due_date`,
+    e.`notes`,
+    e.`dt_created`, 
+    mt.`name`
+FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
+    """
+
+    sql_summary = """
+        SELECT
+            sum(e.`amount`) as amount,
+            sum(e.`paid_amount`) as paid_amount,
+            sum(e.`due_amount`) as due_amount
+        FROM `clinic`.`expense` e
+    """
+
+    print(sql)
+    print(sql_summary)
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        data = dict_fetchall(cursor)
+        cursor.close()
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql_summary)
+        data_summary = dict_fetchall(cursor)
+        cursor.close()
+
+    return {'data': data, 'summary': data_summary}
+
+
+def get_expense_data(filters):
+    where = "where 1=1 "
+
+    if 'categories' in filters and filters['categories'] and len(filters['categories']):
+        categories = filters['categories'].split(',')
+        where = where + " and (1=2 "
+        for i in range(len(categories)):
+            if categories[i] == 'unassigned':
+                where = where + " or mt.idmedicine_type is null "
+            else:
+                where = where + " or mt.idmedicine_type = " + categories[i]
+        where = where + " ) "
+
+    if 'fromDate' in filters and len(filters['fromDate']):
+        where = where + " and e.expense_date >= %(fromDate)s "
+
+    if 'toDate' in filters and len(filters['toDate']):
+        where = where + " and e.expense_date <= %(toDate)s"
+
+    fields = """
+    e.`idexpense`,
+    e.`idmedicine_type`,
+    e.`title`,
+    e.`bill_num`,
+    e.`expense_date`,
+    e.`amount`,
+    e.`paid_amount`,
+    e.`due_amount`,
+    e.`due_on`,
+    e.`due_date`,
+    e.`notes`,
+    e.`dt_created`, 
+    mt.`name`
+    """
+
+    sql = """
+    SELECT  """ + fields + """  FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
+    """ + where
+
+    sql_summary = """
+        SELECT
+            sum(e.`amount`) as amount,
+            sum(e.`paid_amount`) as paid_amount,
+            sum(e.`due_amount`) as due_amount
+        FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
+        """ + where
+
+    print(sql)
+    print(sql_summary)
+    with connection.cursor() as cursor:
+        cursor.execute(sql, filters)
+        data = dict_fetchall(cursor)
+        cursor.close()
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql_summary, filters)
+        data_summary = dict_fetchall(cursor)
+        cursor.close()
+
+    return {'data': data, 'summary': data_summary}

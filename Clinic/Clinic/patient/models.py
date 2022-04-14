@@ -205,6 +205,28 @@ order by visit_date desc
 
     return data
 
+
+def get_visit_by_visit_id(visit_id):
+    sql = """
+          SELECT `visits`.`idvisits`,
+    `visits`.`idpatients`,
+    `visits`.`visit_date`,
+    `visits`.`notes`,
+    `visits`.`idprescription`
+FROM `clinic`.`visits`
+where idvisits=%(visit_id)s
+order by visit_date desc
+
+        """
+    print(sql)
+    with connection.cursor() as cursor:
+        cursor.execute(sql, {'visit_id': visit_id})
+        data = dict_fetchall(cursor)
+        cursor.close()
+
+    return data
+
+
 def get_prescription_by_visit(visit_id):
     sql = """
          SELECT 
@@ -229,6 +251,18 @@ def get_prescription_by_visit(visit_id):
         cursor.close()
 
     return data
+
+
+def get_prescriptions_by_patient(patient_id):
+    visits = get_visits_by_id(patient_id)
+    prescriptions = []
+    print(visits)
+    for i in range(len(visits)):
+        prescription = get_prescription_by_visit(visits[i]['idvisits'])
+        prescriptions.append({'visit_id': visits[i]['idvisits'], 'prescription': prescription})
+
+    return prescriptions
+
 
 def addrx(req):
     print(req)

@@ -7,10 +7,17 @@ import requests
 import json
 import time
 from random import randrange
+from datetime import date, timedelta
 
 
 def admin(request):
+    res = {'status': 'success', 'error': '', 'data': {}, 'types': {}}
+    return render(request, "reports_admin.html", res)
+
+
+def revenue(request):
     res = {'status': 'success', 'error': '', 'data': {}, 'types': get_types}
+
     if request.method == 'GET' and 'categories' in request.GET and 'fromDate' in request.GET and 'toDate' in request.GET:
         #Filters
         filters = {'categories': request.GET['categories'], 'fromDate': request.GET['fromDate'], 'toDate': request.GET['toDate'] }
@@ -30,8 +37,40 @@ def admin(request):
     else:
         res['data'] = models.get_raw_data()
 
-    return render(request, "reports_admin.html", res)
+    return render(request, "reports_revenue.html", res)
 
+
+def expense(request):
+    r = request
+    res = {'status': 'success', 'error': '', 'data': None, 'report': None, 'added': None, 'types': get_types}
+
+    if r.method == 'GET' and 'categories' in r.GET and 'fromDate' in r.GET and 'toDate' in r.GET:
+        #Filters
+        filters = {'categories': r.GET['categories'], 'fromDate': r.GET['fromDate'], 'toDate': r.GET['toDate'] }
+        res['report'] = models.get_expense_data(filters)
+    else:
+        res['report'] = models.get_expense_raw_data()
+
+    return render(request, "reports_expense.html", res)
+
+
+def profit_loss(request):
+    res = {'status': 'success', 'error': '', 'data': {}, 'types': get_types}
+    r = request
+    toDate = date.today().replace(day=1) - timedelta(days=1)
+    fromDate = date.today().replace(day=1) - timedelta(days=toDate.day)
+
+    filters = {'categories': None, 'fromDate': str(fromDate), 'toDate': str(toDate)}
+
+    if r.method == 'GET' and 'categories' in r.GET and 'fromDate' in r.GET and 'toDate' in r.GET:
+        #Filters
+        filters = {'categories': r.GET['categories'], 'fromDate': r.GET['fromDate'], 'toDate': r.GET['toDate'] }
+
+    res['revenue'] = models.get_data(filters, None)
+    res['expense'] = models.get_expense_data(filters)
+    res['filters'] = filters
+
+    return render(request, "profit_loss.html", res)
 
 def is_json(data):
     try:
@@ -44,14 +83,13 @@ def is_json(data):
 def data(request):
     BASE_URL = 'https://www.1mg.com/pharmacy_api_gateway/v4/drug_skus/by_prefix?'
     RELATIVE_PATH = ''
-    prefix_terms = ['a', 'b', 'c']
-    # , 'd','e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-    #                     'u', 'v', 'w', 'x', 'y', 'z'
+    prefix_terms = ['e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                         'u', 'v', 'w', 'x', 'y', 'z']
     # page:87,prefixa,rec 29
     for i in range(len(prefix_terms)):
         page = 1
-        if prefix_terms[i] == 'a':
-            page = 291
+        if prefix_terms[i] == 'e':
+            page = 304
         while True:
             q_param = "prefix_term=" + prefix_terms[i] + "&page=" + str(page) + "&per_page=30"
             time.sleep(randrange(3,8))

@@ -4,14 +4,28 @@
 {% load static %}
 {{error}}
     <style>
-    .patient_tbl, td, th {
-      border: 1px solid;
-    }
 
     .patient_tbl {
       width: 100%;
       border-collapse: collapse;
+      border: 2px solid;
     }
+
+    .patient_tbl tr, .patient_tbl td, .patient_tbl th {
+      border: 2px solid;
+    }
+
+    .patient_info_tbl {
+      border: 1px solid;
+      width: 100%;
+    }
+
+    .patient_info_tbl td, .patient_info_tbl th {
+      border: 1px solid;
+
+    }
+
+
 
     .visits_tbl{
         display: none;
@@ -77,7 +91,7 @@
 
                           td = document.createElement('TD');
                           td.setAttribute("valign","top");
-                          var toggle = document.createElement('div');
+                          var toggle = document.createElement('span');
                           toggle.setAttribute("id","rx_" + 'table_add_' + data.data[i].idvisits);
                           toggle.appendChild(document.createTextNode("+ RX"));
                           toggle.onclick = function(){
@@ -86,6 +100,19 @@
 
                           }
                           td.appendChild(toggle);
+
+                          var print = document.createElement('span');
+                          print.setAttribute("id","print_" + 'table_add_' + data.data[i].idvisits);
+                          print.setAttribute("class","print_icon");
+                          //print.appendChild(document.createTextNode(" Print "));
+                          print.setAttribute("style", "margin:5px 5px 5px 5px");
+                          print.onclick = function(){
+                            console.log("print");
+                            //alert("printing.." + this.id.split("_").slice(-1) );
+                            window.open("/patient/print_prescription/?idvisits=" + this.id.split("_").slice(-1) + "&idpatients=" + global_patient_id, '_blank');
+
+                          }
+                          td.appendChild(print);
 
                            /* HIDDEN TBL FOR ADD */
                                 var table_add = document.createElement('TABLE');
@@ -131,6 +158,7 @@
                                 var input = document.createElement('input');
                                 input.setAttribute("type","text");
                                 input.setAttribute("name","medicine_name");
+                                input.setAttribute("autoComplete","off");
                                 input.onkeyup = function(){
                                     ls = document.getElementById('livesearch_'+this.parentElement.parentElement.parentElement.id.split("_").splice(-1)[0]
 );
@@ -228,6 +256,7 @@
               console.log(data );
 
               $("#visits_for_"+global_patient_id).show();
+              $(".print_icon").html("<img src = '/static/images/print.png'>");
             })
               .done(function() {
                 //alert( "second success" );
@@ -445,7 +474,12 @@
         }
 
         function delete_visit(visit_id){
-            console.log("deleting visit");
+            if (confirm("Sure you want to delete!") == true) {
+              console.log("deleting visit");
+            } else {
+              return false;
+            }
+
             data = {
                     'visit_id': visit_id
             };
@@ -463,9 +497,17 @@
               }
             });
         }
+
+        $(function(){
+            $(".print_icon").innerHTML = "<img src = '{% static 'images/print.png' %}'>"
+        })
+
+        function print_summary(){
+            window.open("/patient/print_summary/?idpatients=" + global_patient_id, '_blank');
+        }
     </script>
 
-    <table id="patient_tbl" class="patient_tbl">
+    <table id="patient_tbl" class="patient_info_tbl">
         <tr>
             <th></th>
             <th>ID</th>
@@ -516,8 +558,11 @@
                 </td>
         </tr>
         <tr class="visits_tbl" id="visits_for_{{patient.idpatients}}">
-            <td colspan="7">
-                <div onclick="add_new_visit('{{patient.idpatients}}');">Add New Visit +</div>
+            <td colspan="9">
+                <div>
+                    <span onclick="add_new_visit('{{patient.idpatients}}');">Add New Visit +</span>
+                    <span style="margin-left:20px" onclick="print_summary('{{patient.idpatients}}');">Print Summary</span>
+                </div>
                 <div id="visit_data_table">
 
                 </div>

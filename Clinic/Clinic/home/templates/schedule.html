@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static%}
+{% block content %}
+
+<script>
+    var times = [];
+    st_dt = new Date('2000-01-01 ');
+    for (var i=0; i<24*60; i=i+15){
+       next_time = new Date(st_dt.getTime()+i*60*1000)
+       hours = next_time.getHours();
+       minutes = next_time.getMinutes();
+       am_pm = 'AM';
+       if (hours >=13) { am_pm = 'PM'; hours = hours - 12; }
+       if (minutes == 0) minutes = "00";
+       times.push(hours + ":" +  minutes + " " + am_pm);
+    }
+
+    function add_time(days){
+
+    }
+</script>
+
+<h5>Schedule</h5>
+<table class="rfstables">
+    <tr>
+        <th colspan="2">General Week Availability</th>
+    </tr>
+    <tr>
+        <td>Mondays <span onclick="add_time('mondays')">+</span></td>
+        <td><div id="mondays">
+            <div>Not Available <input type="checkbox" name="mondays_availability"></div>
+            <div><span><input placeholder="From Time" type="text" name="mondays_1_1"></span> - <span><input placeholder="To Time" type="text" name="mondays_1_2"></span></div>
+            <div><span><input placeholder="From Time" type="text" name="mondays_2_1"></span> - <span><input placeholder="To Time" type="text" name="mondays_2_2"></span></div>
+            <div><span><input placeholder="From Time" type="text" name="mondays_3_1"></span> - <span><input placeholder="To Time" type="text" name="mondays_3_2"></span></div>
+            <div><span><input placeholder="From Time" type="text" name="mondays_4_1"></span> - <span><input placeholder="T0 Time" type="text" name="mondays_3_2"></span></div>
+        </div> </td>
+    </tr>
+    <tr>
+        <td>Tuesdays <span onclick="add_time('tuesdays')">+</span></td>
+        <td><div id="tuesdays"></div></td>
+    </tr>
+    <tr>
+        <td>Wednesdays <span onclick="add_time('wednesdays')">+</span></td>
+        <td><div id="wednesdays"></div></td>
+    </tr>
+    <tr>
+        <td>Thursdays <span onclick="add_time('thursdays')">+</span></td>
+        <td><div id="thursdays"></div></td>
+    </tr>
+    <tr>
+        <td>Fridays <span onclick="add_time('fridays')">+</span></td>
+        <td><div id="fridays"></div></td>
+    </tr>
+    <tr>
+        <td>Saturdays <span onclick="add_time('saturdays')">+</span></td>
+        <td><div id="saturdays"></div></td>
+    </tr>
+    <tr>
+        <td>Sundays <span onclick="add_time('sundays')">+</span></td>
+        <td><div id="sundays"></div></td>
+    </tr>
+</table>
+
+<table class="rfstables">
+    <tr>
+        <th>Specific Dates NON-AVAILABILITY</th>
+        <th>Add Date (+)</th>
+    </tr>
+</table>
+
+<table class="rfstables">
+    <tr>
+        <th>Specific Dates AVAILABILITY</th>
+        <th>Add Date (+)</th>
+    </tr>
+</table>
+
+{% endblock %}
