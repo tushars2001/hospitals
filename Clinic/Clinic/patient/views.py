@@ -254,3 +254,13 @@ def print_summary(request):
 
     return render(request, "patient_summary.html", res)
 
+
+def schedule_appointment(request):
+    res = {'status': 'success', 'error': '', 'data': {}}
+
+    if 'patient_id' in request.POST and request.POST['patient_id'].isdigit():
+        res['data'] = models.get_patient_by_id(request.POST['patient_id'])
+    else:
+        res['error'] = 'Invalid Data provided.'
+
+    return render(request, "schedule_appointment.html", res)

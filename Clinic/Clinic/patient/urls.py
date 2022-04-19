@@ -16,4 +16,5 @@ urlpatterns = [
     path('visits/updateNotes/', views.updateNotes),
     path('print_prescription/', views.print_prescription),
     path('print_summary/', views.print_summary),
+    path('schedule/', views.schedule_appointment),
 ]

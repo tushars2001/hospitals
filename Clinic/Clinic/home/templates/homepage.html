@@ -1,17 +1,109 @@
 {% extends 'base.html' %}
 {% load static%}
 {% block content %}
+<script>
+    function appointments(){
+            data = {
+                    'patient_id': '',
+                    'username': 'admin',
+                    'status':'S',
+                    'date_from': (new Date()).toLocaleDateString('en-ca'),
+                    'date_to':''
+            };
+            $.ajax({
+              url: "/get_appointments/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log(response);
+                if (response.data.length){
+                    var tbl = document.getElementById('appointment_history_tbl');
+                    document.getElementById("appointment_history_tbl").innerHTML='';
+                    tr = document.createElement('TR');
+                    tbl.appendChild(tr);
+                    th = document.createElement('Th');
+                    th.appendChild(document.createTextNode("Patient ID"));
+                    tr.appendChild(th);
+                    th = document.createElement('Th');
+                    th.appendChild(document.createTextNode("Patient Name"));
+                    tr.appendChild(th);
+                    th = document.createElement('Th');
+                    th.appendChild(document.createTextNode("Appointment Date"));
+                    tr.appendChild(th);
+                    th = document.createElement('Th');
+                    th.appendChild(document.createTextNode("Appointment Time"));
+                    tr.appendChild(th);
+                    for(var i=0; i<response.data.length; i++){
+                        tr = document.createElement('TR');
+                        tbl.appendChild(tr);
+                        td = document.createElement('TD');
+                        td.appendChild(document.createTextNode(response.data[i].idpatients));
+                        tr.appendChild(td);
+                        td = document.createElement('TD');
+                        td.appendChild(document.createTextNode(response.data[i].first_name + " " + response.data[i].last_name));
+                        tr.appendChild(td);
+                        td = document.createElement('TD');
+                        td.appendChild(document.createTextNode((new Date(response.data[i].dt.split('-')[0],parseInt(response.data[i].dt.split('-')[1])-1,response.data[i].dt.split('-')[2])).toDateString()));
+                        tr.appendChild(td);
+                        td = document.createElement('TD');
+                        h_m = (response.data[i].from_time).toFixed(2).toString().split(".");
+                        time_from = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                        h_m = (response.data[i].to_time).toFixed(2).toString().split(".");
+                        time_to = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                        td.appendChild(document.createTextNode(time_from.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + " - " + time_to.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })));
+                        tr.appendChild(td);
+                        /*td = document.createElement('TD');
+                        status = response.data[i].status;
+                        if (status == 'S') {
+                            status = 'Scheduled';
+                        }
+                        if (status == 'C') status = 'Cancelled';
+                        if (status == 'M') status = 'Missed';
+                        td.appendChild(document.createTextNode(status));
+                        if( response.data[i].status == 'S'){
+                            span = document.createElement('span');
+                            span.appendChild(document.createTextNode("x"));
+                            span.setAttribute("onclick", "cancel_appointment(" + response.data[i].idappointments + ")");
+                            span.setAttribute('style','cursor:pointer; margin:10px; color:red');
+                            td.appendChild(span);
+                        }
+                        tr.appendChild(td);*/
+                    }
+                    str = "<b>Next Appointment:</b> ";
+                    if (response.data[0].dt == (new Date()).toLocaleDateString('en-ca'))
+                        str = str + "Today "
+                    else
+                        str = str + (new Date(response.data[0].dt.split('-')[0],parseInt(response.data[0].dt.split('-')[1])-1,response.data[0].dt.split('-')[2])).toDateString() + " ";
+                    h_m = (response.data[0].from_time).toFixed(2).toString().split(".");
+                    time_from = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                    h_m = (response.data[0].to_time).toFixed(2).toString().split(".");
+                    time_to = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                    str = str + time_from.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + " - " + time_to.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                    $("#next_appointment").html(str);
 
+                }
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+        $(function(){
+            appointments();
+
+        });
+</script>
 <table border="1" width="100%" cellspacing="30px" cellpadding="15px">
 
-    <tr>
+    <!--<tr>
         <td height="30px" colspan="2">
             <div style="text-align:center" >
                 <span><h3>Clinic Management System
                     </h3></span>
             </div>
         </td>
-    </tr>
+    </tr>-->
     <tr>
         <td>
             <table class="rbstable">
@@ -35,38 +127,53 @@
                         <button style="width:100%" type="button" class="greenbuttons" onclick="window.location='/reports/';">Reporting</button>
                     </td>
                 </tr>
+                <tr>
+                    <td >
+                        <button style="width:100%" type="button" class="greenbuttons" onclick="window.location='/schedule/';">My Schedule</button>
+                    </td>
+                </tr>
             </table>
         </td>
         <td>
             <table class="rbstable">
+                <form name="addform" method="post" action="/patient/search/">
                 <tr>
-                    <td height="30px" colspan="2">
-                        <form name="addform" method="post" action="/patient/search/">
+                    <td height="30px" colspan="" nowrap style="width:10%">
                         {% csrf_token %}
-                            Patient ID: <input type="number" name="patient_id">
-                            <input type="submit" class="greenbuttons" value="Submit">
-                        </form>
+                            Patient ID:
+                    </td>
+                    <td>
+                        <input type="number" name="patient_id">
+                        <input type="submit" class="greenbuttons" value="Submit">
                     </td>
                 </tr>
+                </form>
+                <form name="search" method="post" action="/patients/searchByName/">
                  <tr>
-                    <td height="30px" colspan="2">
-                        <form name="search" method="post" action="/patients/searchByName/">
+                    <td height="30px" colspan="" nowrap>
                         {% csrf_token %}
-                            Patient First Name: <input type="text" name="first_name"><br>
-                            Patient Last Name: <input type="text" name="last_name">
-                            <input type="submit" class="greenbuttons" value="Search">
-                        </form>
+                            Patient First Name: <br>
+                            Patient Last Name:
                     </td>
+                     <td>
+                         <input type="text" name="first_name"><br>
+                         <input type="text" name="last_name">
+                         <input type="submit" class="greenbuttons" value="Search">
+                     </td>
                 </tr>
+                </form>
+                <form name="search" method="post" action="/patients/searchByPhone/">
                 <tr>
-                    <td height="30px" colspan="2">
-                        <form name="search" method="post" action="/patients/searchByPhone/">
+                    <td height="30px" colspan="" nowrap>
                         {% csrf_token %}
-                            Patient Phone #: <input type="text" name="phone"><br>
-                            <input type="submit" class="greenbuttons" value="Search">
-                        </form>
+                            Patient Phone #:
+                    </td>
+                    <td>
+                        <input type="text" name="phone">
+                        <input type="submit" class="greenbuttons" value="Search">
                     </td>
                 </tr>
+                 </form>
             </table>
         </td>
     </tr>
@@ -87,6 +194,19 @@
                     {% endfor %}
                 </tr>
             </table>
+        </td>
+    </tr>
+
+    <tr>
+        <td height="30px" colspan="2">
+            <div id="next_appointment" style="font-size:small"></div>
+            <div style="cursor:pointer" onclick="$('#appointment_history').toggle()">Appointment Details + </div>
+            <div id="appointment_history" style="display:none;">
+                <table id="appointment_history_tbl" class="rbstable">
+
+                </table>
+            </div>
+            <br>
         </td>
     </tr>
 

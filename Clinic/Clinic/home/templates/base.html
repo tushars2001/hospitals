@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" >
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -15,6 +15,8 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap-select.css' %}" >
     <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap-select.min.js' %}" type="javascript"></script>
+
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 
     <style>
 
@@ -146,7 +148,7 @@
 
     <title>Dr Richa's Homeopathy</title>
   </head>
-  <body>
+  <body class="h-100">
   <div id="loginout" style="position:fixed;top:30;right:0;z-index:199;margin-right:30px;margin-top:2px;backgorund-color:white;">
     {% if user.is_authenticated %}
         Welcome {{ user.first_name }}. <a href="/identity/logout/"><img src="{% static 'images/logout.png' %}" height="35px;" width="40px"></a>
@@ -157,7 +159,7 @@
 
   </div>
   <div style="display:none;position:fixed;top:5;z-index:299; background-color:red; width:100%;min-height:20px; text-align:center; color: white" id="global_alert"></div>
-    <div class="container">
+    <div class="container h-100">
       <div class="row justify-content-center">
         <div class="col-8">
           <h1 class="mt-2 text-center"><a href="/"><img src="{% static 'images/DrRichaLogo.png' %}"></a></h1>
@@ -168,9 +170,11 @@
       {% block content %}
       {% endblock %}
     </div>
+  <footer class="mt-auto">
     <div style="width:100%;margin:5px 0px 0px 0px;text-align:center;font-size:small;color:grey">
       <a href="/about/" style="font-size:small;color:grey"> Powered by MedEZ: A Tushar Saxena Initiative </a>
       &#169; <span id="copyright"></span></div>
+    </footer>
     <script>
 
       $(document).ready(function() {

@@ -160,8 +160,7 @@
                                 input.setAttribute("name","medicine_name");
                                 input.setAttribute("autoComplete","off");
                                 input.onkeyup = function(){
-                                    ls = document.getElementById('livesearch_'+this.parentElement.parentElement.parentElement.id.split("_").splice(-1)[0]
-);
+                                    ls = document.getElementById('livesearch_'+this.parentElement.parentElement.parentElement.id.split("_").splice(-1)[0]);
                                     if(this.value.length > 1){
                                         $.get( "/medicine/lookup/?keyword="+this.value, function( data ) {
                                           console.log(data);
@@ -255,7 +254,7 @@
                 }
               console.log(data );
 
-              $("#visits_for_"+global_patient_id).show();
+              $("#visits_for_"+global_patient_id).toggle();
               $(".print_icon").html("<img src = '/static/images/print.png'>");
             })
               .done(function() {
@@ -505,29 +504,78 @@
         function print_summary(){
             window.open("/patient/print_summary/?idpatients=" + global_patient_id, '_blank');
         }
-    </script>
 
+        $(function(){
+            data = {
+                    'patient_id': global_patient_id,
+                    'username': '',
+                    'status':'S',
+                    'date_from': (new Date()).toLocaleDateString('en-ca'),
+                    'date_to':''
+            };
+            $.ajax({
+              url: "/get_appointments/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log(response);
+                if (response.data.length){
+                    str = "<b>Next Appointment:</b> ";
+                    if (response.data[0].dt == (new Date()).toLocaleDateString('en-ca'))
+                        str = str + "Today "
+                    else
+                        str = str + (new Date(response.data[0].dt.split('-')[0],parseInt(response.data[0].dt.split('-')[1])-1,response.data[0].dt.split('-')[2])).toDateString() + " ";
+                    h_m = (response.data[0].from_time).toFixed(2).toString().split(".");
+                    time_from = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                    h_m = (response.data[0].to_time).toFixed(2).toString().split(".");
+                    time_to = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                    str = str + time_from.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + " - " + time_to.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                    $("#next_appointment").html(str);
+                }
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        });
+    </script>
+    <table>
+        <tr>
+            <td>
+                <form method="get" action="/patient/add/">
+                    {% csrf_token %}
+                    <input type="hidden" name="idpatients" value="{{data.0.idpatients}}">
+                    <button type="submit" class="greenbuttons">Edit Patient</button>
+                </form>
+            </td>
+            <td>
+                <button class="greenbuttons" onclick='getVisits({{data.0.idpatients}});'>Show/Hide Visits</button>
+            </td>
+            <td>
+                <form method="post" action="/patient/schedule/">
+                    {% csrf_token %}
+                    <input type="hidden" name="patient_id" value="{{data.0.idpatients}}">
+                    <button class="greenbuttons" type="submit" onclick='scheduleAppointment({{data.0.idpatients}});'>
+                        Appointments
+                    </button>
+                </form>
+            </td>
+            <td><div id="next_appointment" style="font-size:small"></div></td>
+        </tr>
+    </table>
     <table id="patient_tbl" class="patient_info_tbl">
         <tr>
-            <th></th>
             <th>ID</th>
             <th>Name</th>
             <th>Gender</th>
             <th>Phone</th>
             <th>Email</th>
             <th>Address</th>
-            <th>History</th>
-            <th>Visits</th>
+            <th>Chief Complaint</th>
         </tr>
         {% for patient in data %}
         <tr>
-                <td>
-                    <form method="get" action="/patient/add/">
-                        {% csrf_token %}
-                        <input type="hidden" name="idpatients" value="{{patient.idpatients}}">
-                        <button type="submit" class="greenbuttons">Edit</button>
-                    </form>
-                </td>
+
                 <td>
                     {{patient.idpatients}}
                 </td>
@@ -552,10 +600,7 @@
                 <td>
                     {{patient.history}}
                 </td>
-                <td>
-                    <div onclick='getVisits({{patient.idpatients}});'>Show/Hide</div>
 
-                </td>
         </tr>
         <tr class="visits_tbl" id="visits_for_{{patient.idpatients}}">
             <td colspan="9">

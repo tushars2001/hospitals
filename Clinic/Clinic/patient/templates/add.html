@@ -26,7 +26,7 @@
         <h3>Patient ID: {{data.0.idpatients }} Updated</h3>
     {% else %}
         <h2>New Patient Registration </h2>
-        <h3>Patient ID: {{data.0.idpatients }}</h3>
+        {% if data.0.idpatients %}<h3>Patient ID: {{data.0.idpatients }}</h3>{% endif %}
     {% endif %}
 
 </div>
@@ -56,7 +56,7 @@
                     </tr>
                     <tr>
                         <td style="text-align:right">DoB</td>
-                        <td><input name="dob" type="text" id="datepicker" value="{{data.0.dob|date:'Y-m-d'}}"></td>
+                        <td><input name="dob" type="text" id="datepicker" autocomplete="off" value="{{data.0.dob|date:'Y-m-d'}}"></td>
                     </tr>
                     <tr>
                            <td style="text-align:right">Phone</td>
@@ -107,7 +107,7 @@
         <tr>
             <td colspan="2">
                 <table><tr>
-                    <td style="text-align:right">Patient History</td><br>
+                    <td style="text-align:right">Chief Complaint</td><br>
                     <td><textarea name="history" rows="5" cols="50">{{data.0.history}}</textarea></td>
                 </tr></table>
             </td>

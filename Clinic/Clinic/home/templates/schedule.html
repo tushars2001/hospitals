@@ -2,9 +2,21 @@
 {% load static%}
 {% block content %}
 
+<style>
+    .mar-5{
+        margin:5px 5px 5px 5px;
+        cursor: pointer;
+    }
+
+    .noon {
+        background-color: yellow;
+    }
+
+</style>
 <script>
-    var times = [];
-    st_dt = new Date('2000-01-01 ');
+    var times = ['0:00 AM', '0:15 AM', '0:30 AM', '0:45 AM', '1:00 AM', '1:15 AM', '1:30 AM', '1:45 AM', '2:00 AM', '2:15 AM', '2:30 AM', '2:45 AM', '3:00 AM', '3:15 AM', '3:30 AM', '3:45 AM', '4:00 AM', '4:15 AM', '4:30 AM', '4:45 AM', '5:00 AM', '5:15 AM', '5:30 AM', '5:45 AM', '6:00 AM', '6:15 AM', '6:30 AM', '6:45 AM', '7:00 AM', '7:15 AM', '7:30 AM', '7:45 AM', '8:00 AM', '8:15 AM', '8:30 AM', '8:45 AM', '9:00 AM', '9:15 AM', '9:30 AM', '9:45 AM', '10:00 AM', '10:15 AM', '10:30 AM', '10:45 AM', '11:00 AM', '11:15 AM', '11:30 AM', '11:45 AM', '12:00 NOON', '12:15 NOON', '12:30 NOON', '12:45 NOON', '1:00 PM', '1:15 PM', '1:30 PM', '1:45 PM', '2:00 PM', '2:15 PM', '2:30 PM', '2:45 PM', '3:00 PM', '3:15 PM', '3:30 PM', '3:45 PM', '4:00 PM', '4:15 PM', '4:30 PM', '4:45 PM', '5:00 PM', '5:15 PM', '5:30 PM', '5:45 PM', '6:00 PM', '6:15 PM', '6:30 PM', '6:45 PM', '7:00 PM', '7:15 PM', '7:30 PM', '7:45 PM', '8:00 PM', '8:15 PM', '8:30 PM', '8:45 PM', '9:00 PM', '9:15 PM', '9:30 PM', '9:45 PM', '10:00 PM', '10:15 PM', '10:30 PM', '10:45 PM', '11:00 PM', '11:15 PM', '11:30 PM', '11:45 PM'];
+    var days = ['mondays', 'tuesdays', 'wednesdays', 'thursdays', 'fridays', 'saturdays', 'sundays'];
+    /*st_dt = new Date('2000-01-01 ');
     for (var i=0; i<24*60; i=i+15){
        next_time = new Date(st_dt.getTime()+i*60*1000)
        hours = next_time.getHours();
@@ -13,66 +25,402 @@
        if (hours >=13) { am_pm = 'PM'; hours = hours - 12; }
        if (minutes == 0) minutes = "00";
        times.push(hours + ":" +  minutes + " " + am_pm);
-    }
+    }*/
 
     function add_time(days){
+
+    }
+
+    $(function(){
+        selects = $("select");
+        for (var i=0; i < selects.length; i++){
+            $(selects[i])
+                 .append($("<option></option>")
+                            .attr("value", "NA")
+                            .text("--Select Time--"));
+            for (var j=0; j < times.length; j++){
+                $(selects[i])
+                 .append($("<option></option>")
+                            .attr("value", times[j])
+                            .text(times[j]));
+            }
+        }
+
+        $('select').selectpicker({
+            liveSearch: true
+        });
+
+        var schedule_data = {{schedule_data|safe}};
+        var mondays = tuesdays = wednesdays = thursdays = fridays = saturdays = sundays = 0;
+        console.log(schedule_data);
+        for (var i=0 ; i < schedule_data.length; i++)
+        {
+            for(var day=0; day < days.length; day++){
+                if (schedule_data[i]['day_name'] == days[day]){
+                    if(schedule_data[i]['available'] == 'N'){
+                        $("[name='" + days[day] + "_availability']").prop("checked","true");
+                        manage_availability(days[day], $("[name='" + days[day] + "_availability']"));
+                    }
+                    else{
+                        eval(days[day] + '++');
+                        $("[name='" + days[day] + "_"+ eval(days[day]) + "_1']").val(schedule_data[i]['time_from']);
+                        $("[name='" + days[day] + "_"+ eval(days[day]) + "_2']").val(schedule_data[i]['time_to'])
+                    }
+
+                }
+            }
+
+            if(schedule_data[i]['available'] == 'N' && schedule_data[i]['type'] == 'D'){
+                // Specific Non Availability
+                rowid = add_date('specific_non_availability');
+                $("[name='specific_non_availability_date_" + rowid + "']").val(schedule_data[i]['day_date']);
+                if(schedule_data[i]['full_day'] == 'Y'){
+                    $("[name='specific_non_availability_whole_day_" + rowid + "']").prop("checked","true");
+                    manage_availability('specific_non_availability_' + rowid, $("[name='specific_non_availability_whole_day_" + rowid + "']"));
+                }
+                else{
+                    $("[name='specific_non_availability_" + rowid + "_1']").val(schedule_data[i]['time_from']);
+                    $("[name='specific_non_availability_" + rowid + "_2']").val(schedule_data[i]['time_to']);
+                }
+
+            }
+
+            if(schedule_data[i]['available'] == 'Y' && schedule_data[i]['type'] == 'D'){
+                // Specific Non Availability
+                rowid = add_date('specific_availability');
+                $("[name='specific_availability_date_" + rowid + "']").val(schedule_data[i]['day_date']);
+                $("[name='specific_availability_" + rowid + "_1']").val(schedule_data[i]['time_from']);
+                $("[name='specific_availability_" + rowid + "_2']").val(schedule_data[i]['time_to']);
+            }
+        }
+        $('select').selectpicker('render');
+
+        console.log(new Date());
+
+    });
+
+    function htmlDecode(str) {
+        const doc = new DOMParser().parseFromString(str, "text/html");
+        return doc.documentElement.textContent;
+    }
+
+    function update_tos(o){
+        hide_to_upto = $(o).prop('selectedIndex');
+        to_hide = document.getElementsByName(o.name.replace(/.$/,"2"))[0];
+        $(to_hide).find('option').each(function(index){
+                $(this).show().parent().selectpicker('refresh');
+        });
+        $(to_hide).find('option').each(function(index){
+            if(index <= hide_to_upto && index !=0)
+                $(this).hide().parent().selectpicker('refresh');;
+        });
+        $(to_hide).prop("selectedIndex", 0).selectpicker('refresh');
+    }
+
+    function manage_availability(days, o){
+        if($(o).is(":checked"))
+            $("."+days).prop( "disabled", true );
+        else
+            $("."+days).prop( "disabled", false );
+    }
+
+    function add_date(where){
+        table = document.getElementById(where);
+        var tr = document.createElement('TR');
+        table.appendChild(tr);
+        var td = document.createElement('TD');
+        var cal = document.createElement('input');
+        cal.setAttribute("type", "text");
+        cal.setAttribute("class", "datepicker");
+        cal.setAttribute("autoComplete", "off");
+        cal.setAttribute("name", where + "_date_" + tr.rowIndex);
+        td.appendChild(cal);
+        tr.appendChild(td);
+        td = document.createElement('TD');
+        if (where == "specific_non_availability"){
+            whole_day = document.createElement('input');
+            whole_day.setAttribute("type", "checkbox");
+            whole_day.setAttribute("name", where + "_whole_day_" + tr.rowIndex);
+            whole_day.setAttribute("onclick", "manage_availability('" + where+"_"+tr.rowIndex + "', this);");
+            td.appendChild(document.createTextNode("Whole Day: "));
+            td.appendChild(whole_day);
+        }
+        from_time = document.createElement("select");
+        to_time = document.createElement("select");
+        td.appendChild(document.createTextNode(" "));
+        td.appendChild(from_time);
+        td.appendChild(document.createTextNode(" - "));
+        td.appendChild(to_time);
+        from_time.setAttribute("name", where + "_" + tr.rowIndex + "_1");
+        to_time.setAttribute("name", where + "_" + tr.rowIndex + "_2");
+        from_time.setAttribute("onchange", "update_tos(this);");
+        from_time.setAttribute("class", where+"_"+tr.rowIndex);
+        to_time.setAttribute("class", where+"_"+tr.rowIndex);
+         $(from_time)
+                 .append($("<option></option>")
+                            .attr("value", "NA")
+                            .text("--Select Time--"));
+            for (var j=0; j < times.length; j++){
+                $(from_time)
+                 .append($("<option></option>")
+                            .attr("value", times[j])
+                            .text(times[j]));
+            }
+            $(to_time)
+                 .append($("<option></option>")
+                            .attr("value", "NA")
+                            .text("--Select Time--"));
+            for (var j=0; j < times.length; j++){
+                $(to_time)
+                 .append($("<option></option>")
+                            .attr("value", times[j])
+                            .text(times[j]));
+            }
+
+        tr.appendChild(td);
+
+        $( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',
+            shortYearCutoff: 1,
+            changeMonth: true,
+            changeYear: true,
+            minDate: "-99Y",
+            yearRange: "1900:2030"
+        });
+
+        $('select').selectpicker({
+            liveSearch: true
+        });
+
+        return tr.rowIndex;
+
+    }
+
+    function validate_schedule(ret){
+        errors = [];
+        days = ['mondays', 'tuesdays', 'wednesdays', 'thursdays', 'fridays', 'saturdays', 'sundays'];
+        $("input").css({'border':''});
+        $("select").selectpicker('setStyle', '');
+
+        days.forEach(function(day){ //outer checkbox
+            console.log("Checking general " + day);
+            if (!$("[name='"+day+"_availability']").is(":checked")){ console.log("if general checkbox not checked for  " + day);
+                if(
+                    ($("[name='"+day+"_1_1']").val() == 'NA' && $("[name='"+day+"_1_2']").val() != 'NA') ||
+                    ($("[name='"+day+"_1_2']").val() == 'NA' && $("[name='"+day+"_1_1']").val() != 'NA')
+                )
+                errors.push({'fields': day + "_1", 'type': 'general_na'});
+                if(
+                    ($("[name='"+day+"_2_1']").val() == 'NA' && $("[name='"+day+"_2_2']").val() != 'NA') ||
+                    ($("[name='"+day+"_2_2']").val() == 'NA' && $("[name='"+day+"_2_1']").val() != 'NA')
+                )
+                errors.push({'fields': day + "_2", 'type': 'general_na'});
+                if(
+                    ($("[name='"+day+"_3_1']").val() == 'NA' && $("[name='"+day+"_3_2']").val() != 'NA') ||
+                    ($("[name='"+day+"_3_2']").val() == 'NA' && $("[name='"+day+"_3_1']").val() != 'NA')
+                )
+                errors.push({'fields': day + "_3", 'type': 'general_na'});
+                if(
+                    ($("[name='"+day+"_4_1']").val() == 'NA' && $("[name='"+day+"_4_2']").val() != 'NA') ||
+                    ($("[name='"+day+"_4_2']").val() == 'NA' && $("[name='"+day+"_4_1']").val() != 'NA')
+                )
+                errors.push({'fields': day + "_4", 'type': 'general_na'});
+            }
+            });
+
+            $("[name^='specific_non_availability_date_']").each(function(index){
+                idx = index + 1;
+                console.log("checking specific_non_availability_date_" + idx + " with value " + this.value);
+                if (!isNaN(Date.parse(this.value))){ //if it's a date
+                    console.log("-->" + this.value + " is date");
+                    if(!$("[name='specific_non_availability_whole_day_"+idx+"']").is(":checked")){ //and whole day is NOT checked
+                        console.log("-->--> and whole day is not checked");
+                        if($("[name='specific_non_availability_"+idx+"_1']").val() == 'NA' || $("[name='specific_non_availability_"+idx+"_2']").val() == 'NA'){ //if any time is not selected
+                            errors.push({'fields': 'specific_non_availability_'+idx, 'type': 'specific_non_availability_na'});
+                            console.log("-->-->--> and at least one of two time is NA");
+                        }
+                    }
+                }
+                else {// not a date
+                    if($("[name='specific_non_availability_whole_day_"+idx+"']").is(":checked")){ //but selected whole day
+                        errors.push({'fields': this.name, 'type': 'date_field'});
+                    }
+                }
+            });
+
+            $("[name^='specific_availability_date_']").each(function(index){
+                idx = index + 1;
+                console.log("checking specific_availability_date_" + idx + " with value " + this.value);
+                if (!isNaN(Date.parse(this.value))){ //if it's a date
+                    console.log("-->" + this.value + " is date");
+                    if(true){ //and whole day is NOT needed to check
+                        if($("[name='specific_availability_"+idx+"_1']").val() == 'NA' || $("[name='specific_availability_"+idx+"_2']").val() == 'NA'){ //if any time is not selected
+                            errors.push({'fields': 'specific_availability_'+idx, 'type': 'specific_availability_na'});
+                            console.log("-->-->--> and at least one of two time is NA");
+                        }
+                    }
+                }
+            });
+
+        errors.forEach(function(obj){
+            console.log(obj);
+            if(obj.type == "date_field") $("[name='"+obj.fields+"']").css({'border':'4px solid red'});
+            //$("[name='"+obj.fields+"_1']").css({'border':'4px solid red'});
+            //$("[name='"+obj.fields+"_2']").css({'border':'4px solid red'});
+            $("[name='"+obj.fields+"_1']").selectpicker('setStyle', 'btn-danger');
+            $("[name='"+obj.fields+"_2']").selectpicker('setStyle', 'btn-danger');
+
+        });
+        console.log(errors);
+        if (errors.length){
+            alert("Please correct highlighted errors.")
+            return false;
+        }
+        else {
+            any_cb_selected = false;
+            any_selection_made = false;
+            $("form").each(function(){
+                $(this).find(':input').each(function(){
+                    if(this.type == 'checkbox'){
+                        if($(this).is(":checked")){
+                            any_cb_selected = true;
+                        }
+                    }
+
+                    if(this.type == 'select-one'){
+                        if(this.value != 'NA'){
+                            any_selection_made = true;
+                        }
+                    }
+                });
+            });
+            if(any_cb_selected || any_selection_made)
+                return true;
+            else return confirm("Form is empty. This will delete schedule. Are you sure!");
+        }
+    }
+
+    function copy_to(source, direction){
+        var target = '';
+        if (direction == 'next'){
+            for (var i=0; i< days.length; i++){
+                if (days[i] == source) target = days[i+1];
+            }
+        }
+        else {
+            for (var i=0; i< days.length; i++){
+                if (days[i] == source) target = days[i-1];
+            }
+        }
+
+        $("[name^='"+source+"']").each(function(idx){
+            $("[name^='"+target+"']")[idx].value = ($("[name^='"+source+"']")[idx].value);
+        });
+
+        $("[name^='"+target+"']").selectpicker('refresh');
 
     }
 </script>
 
 <h5>Schedule</h5>
-<table class="rfstables">
+
+<form method="post" action="./">
+    {% csrf_token %}
+<table class="rbstable">
     <tr>
         <th colspan="2">General Week Availability</th>
     </tr>
     <tr>
         <td>Mondays <span onclick="add_time('mondays')">+</span></td>
         <td><div id="mondays">
-            <div>Not Available <input type="checkbox" name="mondays_availability"></div>
-            <div><span><input placeholder="From Time" type="text" name="mondays_1_1"></span> - <span><input placeholder="To Time" type="text" name="mondays_1_2"></span></div>
-            <div><span><input placeholder="From Time" type="text" name="mondays_2_1"></span> - <span><input placeholder="To Time" type="text" name="mondays_2_2"></span></div>
-            <div><span><input placeholder="From Time" type="text" name="mondays_3_1"></span> - <span><input placeholder="To Time" type="text" name="mondays_3_2"></span></div>
-            <div><span><input placeholder="From Time" type="text" name="mondays_4_1"></span> - <span><input placeholder="T0 Time" type="text" name="mondays_3_2"></span></div>
+            <div>Not Available <input type="checkbox" name="mondays_availability" onclick="manage_availability('mondays', this)" value="checked"></div>
+            <div><span><select class="mondays" onchange="update_tos(this);" placeholder="From Time" type="text" name="mondays_1_1"></select></span> - <span><select class="mondays" placeholder="To Time" type="text" name="mondays_1_2"></select></span></div>
+            <div><span><select class="mondays" onchange="update_tos(this);" placeholder="From Time" type="text" name="mondays_2_1"></select></span> - <span><select class="mondays" placeholder="To Time" type="text" name="mondays_2_2"></select></span></div>
+            <div><span><select class="mondays" onchange="update_tos(this);" placeholder="From Time" type="text" name="mondays_3_1"></select></span> - <span><select class="mondays" placeholder="To Time" type="text" name="mondays_3_2"></select></span></div>
+            <div><span><select class="mondays" onchange="update_tos(this);" placeholder="From Time" type="text" name="mondays_4_1"></select></span> - <span><select class="mondays" placeholder="T0 Time" type="text" name="mondays_4_2"></select></span></div>
+            <div><span class="mar-5" onclick="copy_to('mondays','next')">Next</span></div>
         </div> </td>
     </tr>
     <tr>
         <td>Tuesdays <span onclick="add_time('tuesdays')">+</span></td>
-        <td><div id="tuesdays"></div></td>
+        <td><div id="tuesdays">
+            <div>Not Available <input type="checkbox" name="tuesdays_availability" onclick="manage_availability('tuesdays', this)" value="checked"></div>
+            <div><span><select class="tuesdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="tuesdays_1_1"></select></span> - <span><select class="tuesdays" placeholder="To Time" type="text" name="tuesdays_1_2"></select></span></div>
+            <div><span><select class="tuesdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="tuesdays_2_1"></select></span> - <span><select class="tuesdays" placeholder="To Time" type="text" name="tuesdays_2_2"></select></span></div>
+            <div><span><select class="tuesdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="tuesdays_3_1"></select></span> - <span><select class="tuesdays" placeholder="To Time" type="text" name="tuesdays_3_2"></select></span></div>
+            <div><span><select class="tuesdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="tuesdays_4_1"></select></span> - <span><select class="tuesdays" placeholder="T0 Time" type="text" name="tuesdays_4_2"></select></span></div>
+            <div><span class="mar-5" onclick="copy_to('tuesdays', 'next')">Next</span><span class="mar-5" onclick="copy_to('tuesdays', 'prev')">Prev</span></div>
+        </div> </td>
     </tr>
     <tr>
         <td>Wednesdays <span onclick="add_time('wednesdays')">+</span></td>
-        <td><div id="wednesdays"></div></td>
+        <td><div id="wednesdays">
+            <div>Not Available <input type="checkbox" name="wednesdays_availability" onclick="manage_availability('wednesdays', this)" value="checked"></div>
+            <div><span><select class="wednesdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="wednesdays_1_1"></select></span> - <span><select class="wednesdays" placeholder="To Time" type="text" name="wednesdays_1_2"></select></span></div>
+            <div><span><select class="wednesdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="wednesdays_2_1"></select></span> - <span><select class="wednesdays" placeholder="To Time" type="text" name="wednesdays_2_2"></select></span></div>
+            <div><span><select class="wednesdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="wednesdays_3_1"></select></span> - <span><select class="wednesdays" placeholder="To Time" type="text" name="wednesdays_3_2"></select></span></div>
+            <div><span><select class="wednesdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="wednesdays_4_1"></select></span> - <span><select class="wednesdays" placeholder="T0 Time" type="text" name="wednesdays_4_2"></select></span></div>
+            <div><span class="mar-5" onclick="copy_to('wednesdays', 'next')">Next</span><span class="mar-5" onclick="copy_to('wednesdays', 'prev')">Prev</span></div>
+        </div> </td>
     </tr>
     <tr>
         <td>Thursdays <span onclick="add_time('thursdays')">+</span></td>
-        <td><div id="thursdays"></div></td>
+        <td><div id="thursdays">
+            <div>Not Available <input type="checkbox" name="thursdays_availability" onclick="manage_availability('thursdays', this)" value="checked"></div>
+            <div><span><select class="thursdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="thursdays_1_1"></select></span> - <span><select class="thursdays" placeholder="To Time" type="text" name="thursdays_1_2"></select></span></div>
+            <div><span><select class="thursdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="thursdays_2_1"></select></span> - <span><select class="thursdays" placeholder="To Time" type="text" name="thursdays_2_2"></select></span></div>
+            <div><span><select class="thursdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="thursdays_3_1"></select></span> - <span><select class="thursdays" placeholder="To Time" type="text" name="thursdays_3_2"></select></span></div>
+            <div><span><select class="thursdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="thursdays_4_1"></select></span> - <span><select class="thursdays" placeholder="T0 Time" type="text" name="thursdays_4_2"></select></span></div>
+            <div><span class="mar-5" onclick="copy_to('thursdays', 'next')">Next</span><span class="mar-5" onclick="copy_to('thursdays', 'prev')">Prev</span></div>
+        </div> </td>
     </tr>
     <tr>
         <td>Fridays <span onclick="add_time('fridays')">+</span></td>
-        <td><div id="fridays"></div></td>
+        <td><div id="fridays">
+            <div>Not Available <input type="checkbox" name="fridays_availability" onclick="manage_availability('fridays', this)" value="checked"></div>
+            <div><span><select class="fridays" onchange="update_tos(this);" placeholder="From Time" type="text" name="fridays_1_1"></select></span> - <span><select class="fridays" placeholder="To Time" type="text" name="fridays_1_2"></select></span></div>
+            <div><span><select class="fridays" onchange="update_tos(this);" placeholder="From Time" type="text" name="fridays_2_1"></select></span> - <span><select class="fridays" placeholder="To Time" type="text" name="fridays_2_2"></select></span></div>
+            <div><span><select class="fridays" onchange="update_tos(this);" placeholder="From Time" type="text" name="fridays_3_1"></select></span> - <span><select class="fridays" placeholder="To Time" type="text" name="fridays_3_2"></select></span></div>
+            <div><span><select class="fridays" onchange="update_tos(this);" placeholder="From Time" type="text" name="fridays_4_1"></select></span> - <span><select class="fridays" placeholder="T0 Time" type="text" name="fridays_4_2"></select></span></div>
+            <div><span class="mar-5" onclick="copy_to('fridays', 'next')">Next</span><span class="mar-5" onclick="copy_to('fridays', 'prev')">Prev</span></div>
+        </div> </td>
     </tr>
     <tr>
         <td>Saturdays <span onclick="add_time('saturdays')">+</span></td>
-        <td><div id="saturdays"></div></td>
+        <td><div id="saturdays">
+            <div>Not Available <input type="checkbox" name="saturdays_availability" onclick="manage_availability('saturdays', this)" value="checked"></div>
+            <div><span><select class="saturdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="saturdays_1_1"></select></span> - <span><select class="saturdays" placeholder="To Time" type="text" name="saturdays_1_2"></select></span></div>
+            <div><span><select class="saturdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="saturdays_2_1"></select></span> - <span><select class="saturdays" placeholder="To Time" type="text" name="saturdays_2_2"></select></span></div>
+            <div><span><select class="saturdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="saturdays_3_1"></select></span> - <span><select class="saturdays" placeholder="To Time" type="text" name="saturdays_3_2"></select></span></div>
+            <div><span><select class="saturdays" onchange="update_tos(this);" placeholder="From Time" type="text" name="saturdays_4_1"></select></span> - <span><select class="saturdays" placeholder="T0 Time" type="text" name="saturdays_4_2"></select></span></div>
+            <div><span class="mar-5" onclick="copy_to('saturdays', 'next')">Next</span><span class="mar-5" onclick="copy_to('saturdays', 'prev')">Prev</span></div>
+        </div> </td>
     </tr>
     <tr>
         <td>Sundays <span onclick="add_time('sundays')">+</span></td>
-        <td><div id="sundays"></div></td>
+        <td><div id="sundays"><div>Not Available <input type="checkbox" name="sundays_availability" onclick="manage_availability('sundays', this)" value="checked"></div>
+            <div><span><select class="sundays" onchange="update_tos(this);" placeholder="From Time" type="text" name="sundays_1_1"></select></span> - <span><select class="sundays" placeholder="To Time" type="text" name="sundays_1_2"></select></span></div>
+            <div><span><select class="sundays" onchange="update_tos(this);" placeholder="From Time" type="text" name="sundays_2_1"></select></span> - <span><select class="sundays" placeholder="To Time" type="text" name="sundays_2_2"></select></span></div>
+            <div><span><select class="sundays" onchange="update_tos(this);" placeholder="From Time" type="text" name="sundays_3_1"></select></span> - <span><select class="sundays" placeholder="To Time" type="text" name="sundays_3_2"></select></span></div>
+            <div><span><select class="sundays" onchange="update_tos(this);" placeholder="From Time" type="text" name="sundays_4_1"></select></span> - <span><select class="sundays" placeholder="T0 Time" type="text" name="sundays_4_2"></select></span></div>
+            <div><span class="mar-5" onclick="copy_to('saturdays', 'sundays')">Prev</span></div>
+        </div> </td>
     </tr>
 </table>
 
-<table class="rfstables">
+<table class="rbstable" id="specific_non_availability">
     <tr>
-        <th>Specific Dates NON-AVAILABILITY</th>
-        <th>Add Date (+)</th>
+        <th colspan="2">Specific Dates NON-AVAILABILITY <button class="greenbuttons" style="cursor:pointer" onclick="add_date('specific_non_availability');return false;">Add Date (+)</button></th>
     </tr>
 </table>
 
-<table class="rfstables">
+<table class="rbstable" id="specific_availability">
     <tr>
-        <th>Specific Dates AVAILABILITY</th>
-        <th>Add Date (+)</th>
+        <th colspan="2">Specific Dates AVAILABILITY <button class="greenbuttons" style="cursor:pointer" onclick="add_date('specific_availability'); return false;">Add Date (+)</button></th>
     </tr>
 </table>
+<div>
+    <input type="submit" value="submit" class="greenbuttons" onclick="return validate_schedule(false);">
+</div>
+</form>
 
 {% endblock %}
