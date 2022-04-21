@@ -11,14 +11,49 @@
 {% endif %}
 <script>
     $( function() {
+
         $( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',
         shortYearCutoff: 1,
         changeMonth: true,
         changeYear: true,
         minDate: "-99Y",
          yearRange: "1900:2030"  });
+
+         var table = $('#expense_report').DataTable({
+            orderCellsTop: true,
+            fixedHeader: true,
+            pageLength: 50,
+            searching: false
+
+        });
+
+        dt_width = $("#expense_report").width();
+
+        $(".data_cell").css({"max-width": dt_width/10-20, "white-space":"nowrap", 'overflow-y':'scroll','scrollbar-width': 'none'});
+
+        {% if added %}
+            global_alert('Expense Added: {{added}}');
+        {% endif %}
+
+        var url_categories = '{{filters.categories}}'.split(",");
+        $("#catSelect").selectpicker('val', url_categories);
+        $("#catSelect").selectpicker('refresh');
+
     });
 
+    function refreshReport(action){
+            if(action == 'F'){ //filter
+                fields = {'filters':{}}
+                categories = $("#catSelect").val();
+                fromDate = $("#fromDate").val();
+                toDate = $("#toDate").val();
+
+                url = "./?categories="+categories+"&fromDate="+fromDate+"&toDate="+toDate;
+
+                window.location = url;
+
+            }
+      }
 
 </script>
 <h3>Reporting</h3>
@@ -27,13 +62,13 @@
 <p><a href="/reports/profit-loss/">Profit/Loss</a></p>
 
 <h5>Profit/Loss Report</h5>
-
+<!--
 {{revenue}}
 <br><br>
 {{expense}}
 <br><br>
 {{filters}}
-
+-->
 <table class="rbstable">
     <tr>
         <td>
@@ -69,8 +104,8 @@
 
                     <td>
                         <span>
-                            <input type="text" value="{{filters.fromDate}}" placeholder="From" name="fromDate" id="fromDate" class="datepicker filterReport" >
-                            <input value="{{filters.toDate}}"  placeholder="To" class="datepicker filterReport" type="text" name="toDate" id="toDate">
+                            <input type="text" value="{{filters.fromDate}}" autocomplete="off" placeholder="From" name="fromDate" id="fromDate" class="datepicker filterReport" >
+                            <input value="{{filters.toDate}}" autocomplete="off" placeholder="To" class="datepicker filterReport" type="text" name="toDate" id="toDate">
                         </span>
                     </td>
                     <td><div onclick="refreshReport('F')"><img src="{% static 'images/refresh.png' %}"></div></td>
@@ -79,5 +114,37 @@
         </td>
     </tr>
 </table>
+<br>
+<div>
+    <table id="expense_report" style="font-size:small">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Revenue Amount</th>
+                <th>Expense Amount</th>
+                <th>Profit/Loss</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for record in p_l.data %}
+            <tr>
+                <td><div class="data_cell">{{record.category}}</div></td>
+                <td><div class="data_cell">&#8377;{{record.revenue_amount}}</div></td>
+                <td><div class="data_cell">&#8377;{{record.expense_amount}}</div></td>
+                <td><div class="data_cell">&#8377;{{record.p_l}}</div></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>{{p_l.summary.0.idmedicine_type}}</th>
 
+                <th><div class="data_cell">&#8377; {{p_l.summary.0.revenue_amount}}</div></th>
+                <th><div class="data_cell">&#8377; {{p_l.summary.0.expense_amount}}</div></th>
+                <th><div class="data_cell">&#8377; {{p_l.summary.0.p_l}}</div></th>
+
+            </tr>
+        </tfoot>
+    </table>
+</div>
 {% endblock %}

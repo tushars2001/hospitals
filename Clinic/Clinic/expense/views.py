@@ -8,7 +8,7 @@ import pdb
 
 def admin(request):
     r = request
-    res = {'status': 'success', 'error': '', 'data': None, 'report': None, 'added': None, 'types': get_types}
+    res = {'status': 'success', 'error': '', 'data': None, 'report': None, 'added': None, 'types': get_types()}
 
     if r.method == 'POST' and 'title' in r.POST and len(r.POST['title']) and 'amount' in r.POST and len(r.POST['amount']):
         res['added'] = models.add_expense(r.POST)

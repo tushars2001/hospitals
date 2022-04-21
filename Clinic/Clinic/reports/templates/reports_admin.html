@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load static %}
 {% if request.GET.error %}
     <p>{{request.GET.error}}</p>
 {% endif %}
@@ -8,8 +9,10 @@
     {{error}}
     {{data}}-->
 {% endif %}
-<h3>Reporting</h3>
-<p><a href="/reports/revenue/">Revenue</a></p>
-<p><a href="/reports/expense">Expense</a></p>
-<p><a href="/reports/profit-loss/">Profit/Loss</a></p>
+<h2>Reporting</h2>
+<h3><table class="rbstable">
+    <tr style="cursor:pointer" onclick="window.location='/reports/revenue/';"><td>Revenue<td><img src="{% static 'images/revenue.png' %}" style="height:150px;width:150px"></td></tr>
+    <tr style="cursor:pointer" onclick="window.location='/reports/expense/';"><td>Expense<td><img src="{% static 'images/expense.png' %}" style="height:150px;width:150px"></td></tr>
+    <tr style="cursor:pointer" onclick="window.location='/reports/profit-loss/';"><td>Profit-Loss<td><img src="{% static 'images/p_l.png' %}" style="height:150px;width:150px"></td></tr>
+</table></a></h3>
 {% endblock %}

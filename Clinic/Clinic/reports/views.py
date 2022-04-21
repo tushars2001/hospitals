@@ -16,7 +16,7 @@ def admin(request):
 
 
 def revenue(request):
-    res = {'status': 'success', 'error': '', 'data': {}, 'types': get_types}
+    res = {'status': 'success', 'error': '', 'data': {}, 'types': get_types()}
 
     if request.method == 'GET' and 'categories' in request.GET and 'fromDate' in request.GET and 'toDate' in request.GET:
         #Filters
@@ -42,11 +42,12 @@ def revenue(request):
 
 def expense(request):
     r = request
-    res = {'status': 'success', 'error': '', 'data': None, 'report': None, 'added': None, 'types': get_types}
+    res = {'status': 'success', 'error': '', 'data': None, 'report': None, 'added': None, 'types': get_types()}
 
     if r.method == 'GET' and 'categories' in r.GET and 'fromDate' in r.GET and 'toDate' in r.GET:
         #Filters
-        filters = {'categories': r.GET['categories'], 'fromDate': r.GET['fromDate'], 'toDate': r.GET['toDate'] }
+        filters = {'categories': r.GET['categories'], 'fromDate': r.GET['fromDate'], 'toDate': r.GET['toDate']}
+        res['filters'] = filters
         res['report'] = models.get_expense_data(filters)
     else:
         res['report'] = models.get_expense_raw_data()
@@ -55,22 +56,21 @@ def expense(request):
 
 
 def profit_loss(request):
-    res = {'status': 'success', 'error': '', 'data': {}, 'types': get_types}
+    res = {'status': 'success', 'error': '', 'data': {}, 'types': get_types()}
     r = request
     toDate = date.today().replace(day=1) - timedelta(days=1)
     fromDate = date.today().replace(day=1) - timedelta(days=toDate.day)
 
     filters = {'categories': None, 'fromDate': str(fromDate), 'toDate': str(toDate)}
-
     if r.method == 'GET' and 'categories' in r.GET and 'fromDate' in r.GET and 'toDate' in r.GET:
         #Filters
         filters = {'categories': r.GET['categories'], 'fromDate': r.GET['fromDate'], 'toDate': r.GET['toDate'] }
-
-    res['revenue'] = models.get_data(filters, None)
-    res['expense'] = models.get_expense_data(filters)
+    # res['revenue'] = models.get_data(filters, None)
+    # res['expense'] = models.get_expense_data(filters)
     res['filters'] = filters
-
+    res['p_l'] = models.get_p_l(filters.copy())
     return render(request, "profit_loss.html", res)
+
 
 def is_json(data):
     try:

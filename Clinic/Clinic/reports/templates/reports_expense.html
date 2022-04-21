@@ -35,6 +35,10 @@
             global_alert('Expense Added: {{added}}');
         {% endif %}
 
+        var url_categories = '{{filters.categories}}'.split(",");
+        $("#catSelect").selectpicker('val', url_categories);
+        $("#catSelect").selectpicker('refresh');
+
     });
 
       function check_form(){
@@ -114,8 +118,8 @@
 
                     <td>
                         <span>
-                            <input type="text" autoComplete='off' placeholder="From" name="fromDate" id="fromDate" class="datepicker filterReport" style="width:99px">
-                            <input style="width:99px" autoComplete='off' placeholder="To" class="datepicker filterReport" type="text" name="toDate" id="toDate">
+                            <input type="text" autoComplete='off' value="{{filters.fromDate}}" placeholder="From" name="fromDate" id="fromDate" class="datepicker filterReport" style="width:99px">
+                            <input style="width:99px" autoComplete='off' value="{{filters.toDate}}" placeholder="To" class="datepicker filterReport" type="text" name="toDate" id="toDate">
                         </span>
                     </td>
                     <td><div onclick="refreshReport('F')"><img src="{% static 'images/refresh.png' %}"></div></td>

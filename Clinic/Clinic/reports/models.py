@@ -11,7 +11,7 @@ def get_raw_data():
     SELECT p.idprescriptions,  v.idvisits, v.visit_date, pt.idpatients, pt.first_name,
         pt.last_name, m.idmedicins, m.`name`, mt.idmedicine_type, mt.`name` as category, p.cost FROM clinic.prescriptions p 
         left join clinic.visits v on p.idvisit = v.idvisits
-        left join clinic.patients pt on v.idvisits = pt.idpatients
+        left join clinic.patients pt on v.idpatients = pt.idpatients
         left join clinic.medicins m on p.idmedicins = m.idmedicins
         left join clinic.medicine_type mt on m.`type` = mt.idmedicine_type
     """
@@ -20,7 +20,7 @@ def get_raw_data():
         SELECT sum(p.cost) as totals 
         FROM clinic.prescriptions p 
             left join clinic.visits v on p.idvisit = v.idvisits
-            left join clinic.patients pt on v.idvisits = pt.idpatients
+            left join clinic.patients pt on v.idpatients = pt.idpatients
             left join clinic.medicins m on p.idmedicins = m.idmedicins
             left join clinic.medicine_type mt on m.`type` = mt.idmedicine_type
         """
@@ -84,7 +84,7 @@ def get_data(filters, grouping):
     sql = """
     SELECT  """ + fields + """  FROM clinic.prescriptions p
         left join clinic.visits v on p.idvisit = v.idvisits
-        left join clinic.patients pt on v.idvisits = pt.idpatients
+        left join clinic.patients pt on v.idpatients = pt.idpatients
         left join clinic.medicins m on p.idmedicins = m.idmedicins
         left join clinic.medicine_type mt on m.`type` = mt.idmedicine_type
     """ + where + group_by_clause
@@ -93,7 +93,7 @@ def get_data(filters, grouping):
         SELECT sum(p.cost) as totals 
         FROM clinic.prescriptions p 
             left join clinic.visits v on p.idvisit = v.idvisits
-            left join clinic.patients pt on v.idvisits = pt.idpatients
+            left join clinic.patients pt on v.idpatients = pt.idpatients
             left join clinic.medicins m on p.idmedicins = m.idmedicins
             left join clinic.medicine_type mt on m.`type` = mt.idmedicine_type
         """ + where
@@ -245,3 +245,90 @@ def get_expense_data(filters):
         cursor.close()
 
     return {'data': data, 'summary': data_summary}
+
+
+def get_p_l(filters):
+    where = "where 1=1 "
+    if 'categories' in filters and filters['categories'] and len(filters['categories']):
+        categories = filters['categories'].split(',')
+        where = where + " and (1=2 "
+        for i in range(len(categories)):
+            if categories[i] == 'unassigned':
+                where = where + " or idmedicine_type is null "
+            else:
+                where = where + " or idmedicine_type = " + categories[i]
+        where = where + " ) "
+
+    if 'fromDate' in filters and len(filters['fromDate']) == 0:
+        filters['fromDate'] = '1800-01-01'
+    if 'toDate' in filters and len(filters['toDate']) == 0:
+        filters['toDate'] = '2200-01-01'
+
+    sql = """
+            select idmedicine_type, category, sum(revenue_amount) as revenue_amount, sum(expense_amount) as expense_amount,
+        (sum(revenue_amount) - sum(expense_amount) ) as p_l
+         from (
+        select idmedicine_type, category, sum(amount) as revenue_amount, expense_amount from (
+         SELECT  
+            mt.idmedicine_type, mt.`name` as category, (p.cost) as amount, 0 as expense_amount 
+              FROM clinic.prescriptions p
+                left join clinic.visits v on p.idvisit = v.idvisits
+                left join clinic.medicins m on p.idmedicins = m.idmedicins
+                left join clinic.medicine_type mt on m.`type` = mt.idmedicine_type
+            where 1=1  and v.visit_date >= %(fromDate)s  and v.visit_date <= %(toDate)s) revenue
+            group by 1,2, 4
+            union
+            select idmedicine_type, category, revenue_amount, sum(amount) as expense_amount from (    
+        SELECT  
+            e.`idmedicine_type`,
+            mt.`name` as category,
+            0 as revenue_amount, 
+            e.`amount`    
+              FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
+            where 1=1  and e.expense_date >= %(fromDate)s  and e.expense_date <= %(toDate)s) expense
+            group by 1,2,3
+        ) final_data """ + where + """group by 1,2
+
+    """
+
+    sql_summary ="""
+                select 'Total' as idmedicine_type, '' as category, sum(revenue_amount) as revenue_amount, sum(expense_amount) as expense_amount,
+            (sum(revenue_amount) - sum(expense_amount) ) as p_l
+             from (
+            select idmedicine_type, category, sum(amount) as revenue_amount, expense_amount from (
+             SELECT  
+                mt.idmedicine_type, mt.`name` as category, (p.cost) as amount, 0 as expense_amount 
+                  FROM clinic.prescriptions p
+                    left join clinic.visits v on p.idvisit = v.idvisits
+                    left join clinic.medicins m on p.idmedicins = m.idmedicins
+                    left join clinic.medicine_type mt on m.`type` = mt.idmedicine_type
+                where 1=1  and v.visit_date >= %(fromDate)s  and v.visit_date <= %(toDate)s) revenue
+                group by 1,2, 4
+                union
+                select idmedicine_type, category, revenue_amount, sum(amount) as expense_amount from (    
+            SELECT  
+                e.`idmedicine_type`,
+                mt.`name` as category,
+                0 as revenue_amount, 
+                e.`amount`    
+                  FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
+                where 1=1  and e.expense_date >= %(fromDate)s  and e.expense_date <= %(toDate)s) expense
+                group by 1,2,3
+            ) final_data """ + where + """group by 1,2
+
+        """
+    print(sql)
+    print(sql_summary)
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql, filters)
+        data = dict_fetchall(cursor)
+        cursor.close()
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql_summary, filters)
+        data_summary = dict_fetchall(cursor)
+        cursor.close()
+
+    return {'data': data, 'summary': data_summary}
+

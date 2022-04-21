@@ -223,6 +223,7 @@
                 console.log(response);
                 get_available_slots(response.dt);
                 global_alert("Appointment Booked. <br> Appointment ID: " + response.appointment_id, 2500);
+                appointments();
               },
               error: function(xhr) {
                 console.log("error");

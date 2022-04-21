@@ -105,9 +105,9 @@ def check_availability(dt, username):
         data['reason'] = 'specific_non_availability'
     else:
         general_availability = models.get_general_availability(dt, username)
-        slot_availability = models.get_slot_availability(dt, username)
         if general_availability:
-            if slot_availability:
+            slot_availability = models.get_available_slots(dt, username, 'general_availability')
+            if len(slot_availability):
                 data['available'] = True
                 data['reason'] = 'general_availability'
             else:
@@ -116,7 +116,8 @@ def check_availability(dt, username):
         else:
             specific_availability = models.specific_availability(dt, username)
             if specific_availability:
-                if slot_availability:
+                slot_availability = models.get_available_slots(dt, username, 'specific_availability')
+                if len(slot_availability):
                     data['available'] = True
                     data['reason'] = 'specific_availability'
                 else:
