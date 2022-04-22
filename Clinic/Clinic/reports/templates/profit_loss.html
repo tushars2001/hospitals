@@ -29,7 +29,7 @@
 
         dt_width = $("#expense_report").width();
 
-        $(".data_cell").css({"max-width": dt_width/10-20, "white-space":"nowrap", 'overflow-y':'scroll','scrollbar-width': 'none'});
+        // $(".data_cell").css({"max-width": dt_width/10-20, "white-space":"nowrap", 'overflow-y':'scroll','scrollbar-width': 'none'});
 
         {% if added %}
             global_alert('Expense Added: {{added}}');

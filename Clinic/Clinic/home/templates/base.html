@@ -2,7 +2,7 @@
 <html lang="en" >
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}" >
     <script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}" type="javascript"></script>
@@ -162,7 +162,12 @@
     <div class="container h-100">
       <div class="row justify-content-center">
         <div class="col-8">
-          <h1 class="mt-2 text-center"><a href="/"><img src="{% static 'images/DrRichaLogo.png' %}"></a></h1>
+          {% if user.is_authenticated %}
+              <h1 class="mt-2 text-center"><a href="/"><img src="{% static 'images/DrRichaLogo.png' %}" class = "img-fluid mx-auto d-block"></a></h1>
+          {% else %}
+              <h1 class="mt-2 text-center"><a href="/"><img src="{% static 'images/medex_big.png' %}" class = "img-fluid mx-auto d-block"></a></h1>
+          {% endif %}
+
           <hr class="mt-0 mb-4">
 
         </div>
