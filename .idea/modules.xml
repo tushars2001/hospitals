@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Clinic.iml" filepath="$PROJECT_DIR$/.idea/Clinic.iml" />
+      <module fileurl="file://$USER_HOME$/Desktop/jira/zapi-cloud/.idea/zapi-cloud.iml" filepath="$USER_HOME$/Desktop/jira/zapi-cloud/.idea/zapi-cloud.iml" />
     </modules>
   </component>
 </project>

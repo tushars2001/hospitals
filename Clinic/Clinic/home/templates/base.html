@@ -149,17 +149,18 @@
     <title>Dr Richa's Homeopathy</title>
   </head>
   <body class="h-100">
-  <div id="loginout" style="position:fixed;top:30;right:0;z-index:199;margin-right:30px;margin-top:2px;backgorund-color:white;">
-    {% if user.is_authenticated %}
-        Welcome {{ user.first_name }}. <a href="/identity/logout/"><img src="{% static 'images/logout.png' %}" height="35px;" width="40px"></a>
 
-    {% else %}
-        <a href="/identity/"><img src="{% static 'images/login.png' %}" height="35px;" width="40px"></a>
-    {% endif %}
-
-  </div>
   <div style="display:none;position:fixed;top:5;z-index:299; background-color:red; width:100%;min-height:20px; text-align:center; color: white" id="global_alert"></div>
     <div class="container h-100">
+      <div id="loginout" style="position:fixed;top:30;right:0;z-index:199;margin-right:30px;margin-top:2px;backgorund-color:white;">
+        {% if user.is_authenticated %}
+            Welcome {{ user.first_name }}. <a href="/identity/logout/"><img src="{% static 'images/logout.png' %}" height="35px;" width="40px"></a>
+
+        {% else %}
+            <a href="/identity/"><img src="{% static 'images/login.png' %}" height="35px;" width="40px"></a>
+        {% endif %}
+
+      </div>
       <div class="row justify-content-center">
         <div class="col-8">
           {% if user.is_authenticated %}

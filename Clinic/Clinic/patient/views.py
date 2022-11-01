@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from . import models
 from django.http import HttpResponse, JsonResponse
@@ -107,6 +107,9 @@ def add(request):
                 patient_id = models.add(fields)
                 res['status'] = 'Success'
                 res['action'] = "Add"
+                pdb.set_trace()
+                response = redirect("/patient/search/?patient_id=" + str(patient_id))
+                return response
 
             res['data'] = models.get_patient_by_id(patient_id)
         else:
@@ -129,7 +132,10 @@ def get_patient_by_id(request):
     if 'patient_id' in request.POST and request.POST['patient_id'].isdigit():
         res['data'] = models.get_patient_by_id(request.POST['patient_id'])
     else:
-        res['error'] = 'Invalid Data provided.'
+        if 'patient_id' in request.GET and request.GET['patient_id'].isdigit():
+            res['data'] = models.get_patient_by_id(request.GET['patient_id'])
+        else:
+            res['error'] = 'Invalid Data provided.'
 
     return render(request, "search.html", res)
 

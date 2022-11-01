@@ -5,6 +5,8 @@ from . import models
 import pdb
 from dateutil.parser import parse
 from django.http import HttpResponse, JsonResponse
+import urllib.request
+import urllib.parse
 
 
 @staff_member_required(login_url='/identity/')
@@ -208,3 +210,20 @@ def is_date(string, fuzzy=False):
 
     except ValueError:
         return False
+
+
+def send_sms(request):
+    resp = sendSMS('NGY0MTVhNzkzODQ0NTk2MTVhNzQzMzQ4MzIzODQzNTE=', '919739603336',
+                   '973960', 'MedEZ Test', '1')
+    print(resp)
+    return render(request, "send_sms.html", {'resp': resp})
+
+
+def sendSMS(apikey, numbers, sender, message, test):
+    data = urllib.parse.urlencode({'apikey': apikey, 'numbers': numbers,
+                                   'message': message, 'sender': sender, 'test': test})
+    data = data.encode('utf-8')
+    request = urllib.request.Request("https://api.textlocal.in/send/?")
+    f = urllib.request.urlopen(request, data)
+    fr = f.read()
+    return fr
