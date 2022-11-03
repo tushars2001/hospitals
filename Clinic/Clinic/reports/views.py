@@ -72,6 +72,23 @@ def profit_loss(request):
     return render(request, "profit_loss.html", res)
 
 
+def patients(request):
+    res = {'status': 'success', 'error': '', 'data': {}, 'types': get_types()}
+    r = request
+    toDate = date.today().replace(day=1) - timedelta(days=1)
+    fromDate = date.today().replace(day=1) - timedelta(days=toDate.day)
+
+    filters = {'categories': None, 'fromDate': str(fromDate), 'toDate': str(toDate)}
+    if r.method == 'GET' and 'categories' in r.GET and 'fromDate' in r.GET and 'toDate' in r.GET:
+        #Filters
+        filters = {'categories': r.GET['categories'], 'fromDate': r.GET['fromDate'], 'toDate': r.GET['toDate'] }
+    # res['revenue'] = models.get_data(filters, None)
+    # res['expense'] = models.get_expense_data(filters)
+    res['filters'] = filters
+    res['patients'] = models.get_patients(filters.copy())
+    return render(request, "patients.html", res)
+
+
 def is_json(data):
     try:
         json.loads(data)

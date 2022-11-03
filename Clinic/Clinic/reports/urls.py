@@ -7,6 +7,7 @@ urlpatterns = [
     path('revenue/', views.revenue),
     path('expense/', views.expense),
     path('profit-loss/', views.profit_loss),
+    path('patients/', views.patients),
     # path('search/', get_patient_by_id),
     # path('visits/', visits),
     # path('visits/prescription/', prescription),

@@ -332,3 +332,35 @@ def get_p_l(filters):
 
     return {'data': data, 'summary': data_summary}
 
+
+def get_patients(filters):
+    where = "where 1=1 "
+    if 'categories' in filters and filters['categories'] and len(filters['categories']):
+        categories = filters['categories'].split(',')
+        where = where + " and (1=2 "
+        for i in range(len(categories)):
+            if categories[i] == 'unassigned':
+                where = where + " or idmedicine_type is null "
+            else:
+                where = where + " or idmedicine_type = " + categories[i]
+        where = where + " ) "
+
+    if 'fromDate' in filters and len(filters['fromDate']) == 0:
+        filters['fromDate'] = '1800-01-01'
+    if 'toDate' in filters and len(filters['toDate']) == 0:
+        filters['toDate'] = '2200-01-01'
+
+    sql = """
+           SELECT * FROM clinic.patients
+    """
+
+    print(sql)
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql, filters)
+        data = dict_fetchall(cursor)
+        cursor.close()
+
+    return {'data': data, 'summary': {}}
+
+

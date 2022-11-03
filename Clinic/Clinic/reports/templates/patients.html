@@ -19,15 +19,15 @@
         minDate: "-99Y",
          yearRange: "1900:2030"  });
 
-         var table = $('#expense_report').DataTable({
+         var table = $('#patient_report').DataTable({
             orderCellsTop: true,
             fixedHeader: true,
-            pageLength: 50,
-            searching: false
+            pageLength: 10,
+            searching: true
 
         });
 
-        dt_width = $("#expense_report").width();
+        dt_width = $("#patient_report").width();
 
         // $(".data_cell").css({"max-width": dt_width/10-20, "white-space":"nowrap", 'overflow-y':'scroll','scrollbar-width': 'none'});
 
@@ -61,7 +61,8 @@
 <p><a href="/reports/expense">Expense</a></p>
 <p><a href="/reports/profit-loss/">Profit/Loss</a></p>
 <p><a href="/reports/patients/">Patients</a></p>
-<h5>Profit/Loss Report</h5>
+
+<h5>Patients Report</h5>
 <!--
 {{revenue}}
 <br><br>
@@ -69,7 +70,7 @@
 <br><br>
 {{filters}}
 -->
-<table class="rbstable">
+<table class="rbstable" style="display:none">
     <tr>
         <td>
             <b>Filters</b>
@@ -116,35 +117,36 @@
 </table>
 <br>
 <div>
-    <table id="expense_report" style="font-size:small">
+    <table id="patient_report" style="font-size:small">
         <thead>
             <tr>
-                <th>Category</th>
-                <th>Revenue Amount</th>
-                <th>Expense Amount</th>
-                <th>Profit/Loss</th>
+                <th>Patient ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>DOB</th>
+                <th>Gender</th>
+                <th>Ph</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Record Date</th>
             </tr>
         </thead>
         <tbody>
-        {% for record in p_l.data %}
+        {% for record in patients.data %}
             <tr>
-                <td><div class="data_cell">{{record.category}}</div></td>
-                <td><div class="data_cell">&#8377;{{record.revenue_amount}}</div></td>
-                <td><div class="data_cell">&#8377;{{record.expense_amount}}</div></td>
-                <td><div class="data_cell">&#8377;{{record.p_l}}</div></td>
+                <td><div class="data_cell">{{record.idpatients}}</div></td>
+                <td><div class="data_cell">{{record.first_name}}</div></td>
+                <td><div class="data_cell">{{record.last_name}}</div></td>
+                <td><div class="data_cell">{{record.dob|date:"SHORT_DATE_FORMAT"}}</div></td>
+                <td><div class="data_cell">{{record.gender}}</div></td>
+                <td><div class="data_cell">{{record.phone}}</div></td>
+                <td><div class="data_cell">{{record.email}}</div></td>
+                <td><div class="data_cell">{{record.address_line_1}}, {{record.address_line_2}}, {{record.address_line_3}}, {{record.city}}, {{record.state}}</div></td>
+                <td><div class="data_cell">{{record.date_created|date:"SHORT_DATE_FORMAT"}}</div></td>
             </tr>
         {% endfor %}
         </tbody>
-        <tfoot>
-            <tr>
-                <th>{{p_l.summary.0.idmedicine_type}}</th>
 
-                <th><div class="data_cell">&#8377; {{p_l.summary.0.revenue_amount}}</div></th>
-                <th><div class="data_cell">&#8377; {{p_l.summary.0.expense_amount}}</div></th>
-                <th><div class="data_cell">&#8377; {{p_l.summary.0.p_l}}</div></th>
-
-            </tr>
-        </tfoot>
     </table>
 </div>
 {% endblock %}
