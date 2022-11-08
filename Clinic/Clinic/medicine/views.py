@@ -100,7 +100,6 @@ def type_unmapped(request):
 def type_mapped(request):
     res = {'status': 'success', 'error': '', 'data': {}}
     if request.method == 'POST':
-        pdb.set_trace()
         if 'idmedicins' in request.POST:
             print("UPDATING NULL!")
             map = models.map(None, request.POST.getlist('idmedicins'))

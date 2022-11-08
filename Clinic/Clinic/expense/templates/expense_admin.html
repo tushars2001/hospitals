@@ -48,7 +48,7 @@
             alert("Title and Amount are mandatory.");
             return false;
         }
-        else if (amount != paid + due) {
+        else if (parseFloat(amount) != parseFloat(paid) + parseFloat(due)) {
             alert("Amount paid + due should match total amount");
             return false;
         }
@@ -69,6 +69,8 @@
 
             }
       }
+
+
 </script>
 <style>
     .data_cell::-webkit-scrollbar { width: 0px; height: 0%; background-color: gray; }
@@ -215,6 +217,7 @@
                 <th>Bill No</th>
                 <th>Record Created</th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -232,6 +235,14 @@
                 <td><div class="data_cell">{{record.bill_num}}</div></td>
                 <td><div class="data_cell">{{record.dt_created|date:'d-M-Y'}}</div></td>
                 <td title="{{record.notes}}" style="cursor:pointer">N</td>
+                <td title="Delete" style="cursor:pointer">
+                    <form method="post" action="./">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete">
+                        <input type="hidden" name="idexpense" value="{{record.idexpense}}">
+                        <button type="submit" value="Submit" class="greenbuttons">X</button>
+                    </form>
+                </td>
             </tr>
         {% endfor %}
         </tbody>

@@ -471,6 +471,7 @@
             <th>ID</th>
             <th>Name</th>
             <th>Gender</th>
+            <th>Age</th>
             <th>Phone</th>
             <th>Email</th>
             <th>Address</th>
@@ -489,25 +490,28 @@
                     {{patient.idpatients}}
                 </td>
                 <td>
-                    {{patient.first_name}} {{patient.last_name}}
+                    {{patient.first_name}} {{patient.last_name|default_if_none:""}}
                 </td>
                 <td>
-                    {{patient.gender}}
+                    {{patient.gender|default_if_none:""}}
                 </td>
                 <td>
-                    {{patient.phone}}
+                    {{patient.age|default_if_none:""}}
                 </td>
                 <td>
-                    {{patient.email}}
+                    {{patient.phone|default_if_none:""}}
                 </td>
                 <td>
-                    {% if patient.address_line_1 != '' %}{{patient.address_line_1}}<br>{% endif %}
-                    {% if patient.address_line_2 != '' %}{{patient.address_line_2}}<br>{% endif %}
-                    {% if patient.address_line_3 != '' %}{{patient.address_line_3}}<br>{% endif %}
-                    {{patient.city}}, {{patient.state}}, {{patient.zip}}
+                    {{patient.email|default_if_none:""}}
                 </td>
                 <td>
-                    {{patient.history}}
+                    {% if patient.address_line_1 != '' %}{{patient.address_line_1|default_if_none:""}}<br>{% endif %}
+                    {% if patient.address_line_2 != '' %}{{patient.address_line_2|default_if_none:""}}<br>{% endif %}
+                    {% if patient.address_line_3 != '' %}{{patient.address_line_3|default_if_none:""}}<br>{% endif %}
+                    {{patient.city|default_if_none:""}} {{patient.state|default_if_none:""}} {{patient.zip|default_if_none:""}}
+                </td>
+                <td>
+                    {{patient.history|default_if_none:""}}
                 </td>
         </tr>
 

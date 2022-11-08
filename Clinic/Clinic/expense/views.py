@@ -13,6 +13,9 @@ def admin(request):
     if r.method == 'POST' and 'title' in r.POST and len(r.POST['title']) and 'amount' in r.POST and len(r.POST['amount']):
         res['added'] = models.add_expense(r.POST)
 
+    if r.method == 'POST' and 'delete' in r.POST and 'idexpense' in r.POST and len(r.POST['idexpense']):
+        res['deleted'] = models.delete_expense(r.POST['idexpense'])
+
     if r.method == "GET" and 'idexpense' in r.GET:
         res['data'] = models.get_expense(r.GET['idexpense'])
 

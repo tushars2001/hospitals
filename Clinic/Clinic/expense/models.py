@@ -22,9 +22,9 @@ def get_expense(idexpense):
         e.`dt_created`, 
         mt.`name`
     FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
-    where e.idexpense = %(idexpense)s
+    where e.idexpense = %(idexpense)s and not e.deleted  
         """
-
+    pdb.set_trace()
     print(sql)
     with connection.cursor() as cursor:
         cursor.execute(sql, {'idexpense': idexpense})
@@ -153,3 +153,16 @@ def add_expense(req):
         expense_id = data[0][0]
 
     return expense_id
+
+
+def delete_expense(idexpense):
+    sql = """
+    update `clinic`.`expense` set deleted = 1 where idexpense = %(idexpense)s
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql, {'idexpense': idexpense})
+        data = cursor.fetchall()
+        cursor.close()
+
+    return idexpense

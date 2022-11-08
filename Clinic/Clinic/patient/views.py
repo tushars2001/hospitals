@@ -11,6 +11,7 @@ def add(request):
         {'first_name': '', 'required': True, 'type': 'char'},
         {'last_name': '', 'required': False, 'type': 'char'},
         {'dob': '', 'required': False, 'type': 'date'},
+        {'age': '', 'required': False, 'type': 'int'},
         {'phone': '', 'required': False, 'type': 'char'},
         {'email': '', 'required': False, 'type': 'email'},
         {'address1': '', 'required': False, 'type': 'char'},
@@ -24,7 +25,7 @@ def add(request):
     fields = {}
     res = {'status': 'unknown', 'error': '', 'data': {}}
     print(request)
-    if request.method == "POST": # Add patient
+    if request.method == "POST":  # Add patient
         if 'first_name' in request.POST and len(request.POST['first_name']) > 0:
             fields['first_name'] = request.POST['first_name']
         else:
@@ -44,6 +45,11 @@ def add(request):
             fields['dob'] = request.POST['dob']
         else:
             fields['dob'] = None
+
+        if 'age' in request.POST and request.POST['age'].isdigit():
+            fields['age'] = request.POST['age']
+        else:
+            fields['age'] = None
 
         if 'phone' in request.POST:
             fields['phone'] = request.POST['phone']
@@ -107,7 +113,6 @@ def add(request):
                 patient_id = models.add(fields)
                 res['status'] = 'Success'
                 res['action'] = "Add"
-                pdb.set_trace()
                 response = redirect("/patient/search/?patient_id=" + str(patient_id))
                 return response
 

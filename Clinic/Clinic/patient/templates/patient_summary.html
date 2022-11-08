@@ -61,6 +61,8 @@
                         <td>{{data.patient_info.0.first_name}} {{data.patient_info.0.last_name}}</td>
                         <th>Patient DoB:</th>
                         <td>{{data.patient_info.0.dob|date:'d-M-Y'|default_if_none:""}}</td>
+                        <th>Patient Age:</th>
+                        <td>{{data.patient_info.0.age|default_if_none:""}}</td>
                     </tr>
                 </table>
                 <br>

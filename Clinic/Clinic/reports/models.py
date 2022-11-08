@@ -6,6 +6,7 @@ import pdb
 
 # Create your models here.
 
+
 def get_raw_data():
     sql = """
     SELECT p.idprescriptions,  v.idvisits, v.visit_date, pt.idpatients, pt.first_name,
@@ -159,6 +160,7 @@ def get_expense_raw_data():
     e.`dt_created`, 
     mt.`name`
 FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
+where not e.deleted
     """
 
     sql_summary = """
@@ -166,7 +168,7 @@ FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_
             sum(e.`amount`) as amount,
             sum(e.`paid_amount`) as paid_amount,
             sum(e.`due_amount`) as due_amount
-        FROM `clinic`.`expense` e
+        FROM `clinic`.`expense` e where not e.deleted
     """
 
     print(sql)
@@ -203,6 +205,8 @@ def get_expense_data(filters):
 
     if 'toDate' in filters and len(filters['toDate']):
         where = where + " and e.expense_date <= %(toDate)s"
+
+    where = where + " and not e.deleted"
 
     fields = """
     e.`idexpense`,
@@ -285,7 +289,7 @@ def get_p_l(filters):
             0 as revenue_amount, 
             e.`amount`    
               FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
-            where 1=1  and e.expense_date >= %(fromDate)s  and e.expense_date <= %(toDate)s) expense
+            where not deleted  and e.expense_date >= %(fromDate)s  and e.expense_date <= %(toDate)s) expense
             group by 1,2,3
         ) final_data """ + where + """group by 1,2
 
@@ -312,7 +316,7 @@ def get_p_l(filters):
                 0 as revenue_amount, 
                 e.`amount`    
                   FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
-                where 1=1  and e.expense_date >= %(fromDate)s  and e.expense_date <= %(toDate)s) expense
+                where not e.deleted  and e.expense_date >= %(fromDate)s  and e.expense_date <= %(toDate)s) expense
                 group by 1,2,3
             ) final_data """ + where + """group by 1,2
 
