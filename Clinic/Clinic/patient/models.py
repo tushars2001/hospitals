@@ -294,9 +294,14 @@ def addrx(req):
     else:
         fields['notes'] = None
 
+    if len(req['cost']) > 0:
+        fields['cost'] = req['cost']
+    else:
+        fields['cost'] = None
+
     fields['notes'] = req['notes']
     fields['visit_id'] = req['visit_id']
-    fields['cost'] = req['cost']
+    # fields['cost'] = req['cost']
 
     medicine_id = get_medicine_id(req['medicine_name'])
     fields['medicine_id'] = medicine_id

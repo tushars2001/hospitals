@@ -4,5 +4,6 @@
     <mapping directory="$USER_HOME$/Desktop/jira/zapi-cloud" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Clinic" vcs="Git" />
   </component>
 </project>

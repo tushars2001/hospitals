@@ -44,6 +44,9 @@
         amount = f['amount'].value;
         paid = f['paid_amount'].value;
         due = f['due_amount'].value;
+        isNaN(parseFloat(due))?due=0:due=due;
+        isNaN(parseFloat(amount))?amount=0:amount=amount;
+        isNaN(parseFloat(paid))?paid=0:paid=paid;
         if (title.length == 0 || amount.length == 0){
             alert("Title and Amount are mandatory.");
             return false;
@@ -52,8 +55,11 @@
             alert("Amount paid + due should match total amount");
             return false;
         }
-        else
+        else{
+            $("#bsubmit").prop('disabled', true);
+            $("#bsubmit").text("Submitting..");
             f.submit();
+        }
       }
 
       function refreshReport(action){
@@ -148,7 +154,7 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <button type="button" value="Submit" onclick="check_form();" class="greenbuttons">Submit</button>
+                    <button type="button" value="Submit" id="bsubmit" onclick="check_form();" class="greenbuttons">Submit</button>
                 </td>
             </tr>
         </table>

@@ -11,7 +11,7 @@ def add(request):
         {'first_name': '', 'required': True, 'type': 'char'},
         {'last_name': '', 'required': False, 'type': 'char'},
         {'dob': '', 'required': False, 'type': 'date'},
-        {'age': '', 'required': False, 'type': 'int'},
+        {'age': '', 'required': False, 'type': 'double'},
         {'phone': '', 'required': False, 'type': 'char'},
         {'email': '', 'required': False, 'type': 'email'},
         {'address1': '', 'required': False, 'type': 'char'},
@@ -46,7 +46,7 @@ def add(request):
         else:
             fields['dob'] = None
 
-        if 'age' in request.POST and request.POST['age'].isdigit():
+        if 'age' in request.POST and len(request.POST['age']):
             fields['age'] = request.POST['age']
         else:
             fields['age'] = None

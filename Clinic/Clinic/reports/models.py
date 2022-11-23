@@ -368,3 +368,50 @@ def get_patients(filters):
     return {'data': data, 'summary': {}}
 
 
+def delete_patient(idpatients):
+    sql = """
+        INSERT INTO `clinic`.`patients_deleted`(`patients_deleted`.`idpatients`,
+        `patients_deleted`.`first_name`,
+        `patients_deleted`.`last_name`,
+        `patients_deleted`.`dob`,
+        `patients_deleted`.`gender`,
+        `patients_deleted`.`phone`,
+        `patients_deleted`.`email`,
+        `patients_deleted`.`address_line_1`,
+        `patients_deleted`.`address_line_2`,
+        `patients_deleted`.`address_line_3`,
+        `patients_deleted`.`city`,
+        `patients_deleted`.`zip`,
+        `patients_deleted`.`state`,
+        `patients_deleted`.`date_created`,
+        `patients_deleted`.`history`)
+    (
+    SELECT `patients`.`idpatients`,
+        `patients`.`first_name`,
+        `patients`.`last_name`,
+        `patients`.`dob`,
+        `patients`.`gender`,
+        `patients`.`phone`,
+        `patients`.`email`,
+        `patients`.`address_line_1`,
+        `patients`.`address_line_2`,
+        `patients`.`address_line_3`,
+        `patients`.`city`,
+        `patients`.`zip`,
+        `patients`.`state`,
+        `patients`.`date_created`,
+        `patients`.`history`
+    FROM `clinic`.`patients` where `idpatients` = %(idpatients)s)
+
+    """
+
+    sql_delete = """delete from `clinic`.`patients` where `idpatients` = %(idpatients)s """
+
+    print(sql)
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql, {'idpatients': idpatients})
+        cursor.execute(sql_delete, {'idpatients': idpatients})
+        cursor.close()
+
+    return idpatients

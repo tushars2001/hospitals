@@ -129,6 +129,7 @@
                 <th>Email</th>
                 <th>Address</th>
                 <th>Record Date</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -143,6 +144,14 @@
                 <td><div class="data_cell">{{record.email}}</div></td>
                 <td><div class="data_cell">{{record.address_line_1}}, {{record.address_line_2}}, {{record.address_line_3}}, {{record.city}}, {{record.state}}</div></td>
                 <td><div class="data_cell">{{record.date_created|date:"SHORT_DATE_FORMAT"}}</div></td>
+                <td title="Delete" style="cursor:pointer">
+                    <form method="post" action="./">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete">
+                        <input type="hidden" name="idpatients" value="{{record.idpatients}}">
+                        <button type="submit" value="Submit" class="greenbuttons">X</button>
+                    </form>
+                </td>
             </tr>
         {% endfor %}
         </tbody>

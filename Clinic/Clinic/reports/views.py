@@ -78,6 +78,9 @@ def patients(request):
     toDate = date.today().replace(day=1) - timedelta(days=1)
     fromDate = date.today().replace(day=1) - timedelta(days=toDate.day)
 
+    if r.method == 'POST' and 'delete' in r.POST and 'idpatients' in r.POST and len(r.POST['idpatients']):
+        res['deleted'] = models.delete_patient(r.POST['idpatients'])
+
     filters = {'categories': None, 'fromDate': str(fromDate), 'toDate': str(toDate)}
     if r.method == 'GET' and 'categories' in r.GET and 'fromDate' in r.GET and 'toDate' in r.GET:
         #Filters

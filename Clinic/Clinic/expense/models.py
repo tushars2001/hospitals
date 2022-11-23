@@ -24,7 +24,6 @@ def get_expense(idexpense):
     FROM `clinic`.`expense` e left join `clinic`.`medicine_type` mt on e.idmedicine_type = mt.idmedicine_type
     where e.idexpense = %(idexpense)s and not e.deleted  
         """
-    pdb.set_trace()
     print(sql)
     with connection.cursor() as cursor:
         cursor.execute(sql, {'idexpense': idexpense})
