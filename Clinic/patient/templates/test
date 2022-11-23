@@ -1,0 +1,76 @@
+ /* HIDDEN TBL FOR ADD */
+    var table_add = document.createElement('TABLE');
+    table_add.setAttribute('class', 'patient_tbl');
+
+    var th = document.createElement('TR');
+    table_add.appendChild(th);
+
+    var td_add = document.createElement('TH');
+    td_add.appendChild(document.createTextNode("Medicine"));
+    th.appendChild(td_add);
+
+    td_add = document.createElement('TH');
+    td_add.appendChild(document.createTextNode("Frequency"));
+    th.appendChild(td_add);
+
+    td_add = document.createElement('TH');
+    td_add.appendChild(document.createTextNode("Duration"));
+    th.appendChild(td_add);
+
+    td_add = document.createElement('TH');
+    td_add.appendChild(document.createTextNode("Quantity"));
+    th.appendChild(td_add);
+
+    td_add = document.createElement('TH');
+    td_add.appendChild(document.createTextNode("Notes"));
+    th.appendChild(td_add);
+
+    td_add = document.createElement('TH');
+    td_add.appendChild(document.createTextNode(""));
+    th.appendChild(td_add);
+
+    var tr = document.createElement('TR');
+    table_add.appendChild(tr);
+    var td_add = document.createElement('TD');
+    var input = document.createElement('input');
+    input.setAttribute("type","text");
+    input.setAttribute("name","medicine_name");
+    td_add.appendChild(input);
+    tr.appendChild(td_add);
+
+    td_add = document.createElement('TD');
+    input = document.createElement('input');
+    input.setAttribute("type","text");
+    input.setAttribute("name","frequency");
+    td_add.appendChild(input);
+    tr.appendChild(td_add);
+
+    td_add = document.createElement('TD');
+    input = document.createElement('input');
+    input.setAttribute("type","text");
+    input.setAttribute("name","duration");
+    td_add.appendChild(input);
+    tr.appendChild(td_add);
+
+    td_add = document.createElement('TD');
+    input = document.createElement('input');
+    input.setAttribute("type","text");
+    input.setAttribute("name","quantity");
+    td_add.appendChild(input);
+    tr.appendChild(td_add);
+
+    td_add = document.createElement('TD');
+    input = document.createElement('input');
+    input.setAttribute("type","text");
+    input.setAttribute("name","notes");
+    td_add.appendChild(input);
+    tr.appendChild(td_add);
+
+    td_add = document.createElement('TD');
+    input = document.createElement('input');
+    input.setAttribute("type","submit");
+    input.setAttribute("value","Add");
+    td_add.appendChild(input);
+    tr.appendChild(td_add);
+    td.appendChild(table_add);
+/* ********************* */

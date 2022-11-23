@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% load static %}
+{{error}}
+    <style>
+
+    .patient_tbl {
+      width: 100%;
+      border-collapse: collapse;
+      border: 2px solid;
+    }
+
+    .patient_tbl tr, .patient_tbl td, .patient_tbl th {
+      border: 2px solid;
+    }
+
+    .patient_info_tbl {
+      border: 1px solid;
+      width: 100%;
+    }
+
+    .patient_info_tbl td, .patient_info_tbl th {
+      border: 1px solid;
+
+    }
+
+    .visits_tbl{
+        display: none;
+    }
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'js/pickadate.js-master/lib/themes/default.css' %}" >
+    <link rel="stylesheet" type="text/css" href="{% static 'js/pickadate.js-master/lib/themes/default.date.css' %}" >
+    <script type="text/javascript" src="{% static 'js/pickadate.js-master/lib/picker.js' %}" type="javascript"></script>
+    <script type="text/javascript" src="{% static 'js/pickadate.js-master/lib/picker.date.js' %}" type="javascript"></script>
+    <script type="text/javascript" src="{% static 'js/pickadate.js-master/lib/legacy.js' %}" type="javascript"></script>
+
+
+    <script language="JavaScript">
+        {% for patient in data %}
+                var global_patient_id = {{patient.idpatients}};
+        {% endfor %}
+
+        $(function(){
+           var  today  = new Date();
+           var tomorrow = new Date();
+           tomorrow.setDate(today.getDate() + 1)
+
+            data = {
+                    'dt': today.toLocaleDateString('en-CA')
+            };
+            $.ajax({
+              url: "/availability/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                if (response.available){
+                    $("#available_today").html("Available");
+                    $("#available_today").css({
+                        'background-color': 'green',
+                        'color': 'white'
+                    });
+                }
+                else{
+                    $("#available_today").html("Not Available");
+                    $("#available_today").css({
+                        'background-color': 'red',
+                        'color': 'white'
+                    });
+                }
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+
+             data = {
+                    'dt': tomorrow.toLocaleDateString('en-CA')
+            };
+            $.ajax({
+              url: "/availability/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                if (response.available){
+                    $("#available_tomorrow").html("Available");
+                    $("#available_tomorrow").css({
+                        'background-color': 'green',
+                        'color': 'white'
+                    });
+                }
+                else{
+                    $("#available_tomorrow").html("Not Available");
+                    $("#available_tomorrow").css({
+                        'background-color': 'red',
+                        'color': 'white'
+                    });
+                }
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+
+            $( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',
+                shortYearCutoff: 1,
+                changeMonth: true,
+                changeYear: true,
+                minDate: '2022-04-18',
+                yearRange: "2022:2023"
+            });
+
+            $("[data-handler='selectDay']").each(function(td){
+                console.log(td);
+            });
+            today = new Date();
+            $('.pickadate').pickadate({
+                'format': 'yyyy-mm-d',
+                min: new Date(today.getFullYear(),today.getMonth(),today.getDate()),
+                max: new Date(today.getFullYear(),today.getMonth()+6,today.getDate()),
+                onRender: function() {
+                    console.log('Whoa.. rendered anew');
+                    check_manage_cal();
+                  },
+                  onOpen: function() {
+                    console.log('Opened up');
+                    check_manage_cal();
+
+                  },
+                  onSet: function(context) {
+                    console.log('Just set stuff:', context);
+                    get_available_slots((new Date(context.select)).toLocaleDateString('en-ca'));
+                  }
+            });
+
+            appointments();
+
+        });
+
+        function check_manage_cal(){
+            $(".picker__day").not(".picker__day--disabled").each(function(d){
+                dt = this.getAttribute('aria-label');
+                data = {
+                        'dt': dt
+                };
+                $.ajax({
+                  url: "/availability/",
+                  type: "get", //send it through get method
+                  data: data,
+                  success: function(response) {
+                    console.log(response);
+                    if (response.available){
+                        $("div[aria-label='" + response.date + "']").css("background","green");
+                    }
+                    else{
+                        $("div[aria-label='" + response.date + "']").addClass("picker__day--disabled");
+                        $("div[aria-label='" + response.date + "']").css("background","red");
+                    }
+                  },
+                  error: function(xhr) {
+                    console.log("error");
+                  }
+                });
+            });
+        }
+
+        function get_available_slots(dt){
+            data = {
+                        'dt': dt
+            };
+            $.ajax({
+              url: "/slots/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log(response);
+                var slot_table = document.getElementById('slot_table');
+                var rows = slot_table.rows.length;
+                while (slot_table.rows.length > 1){
+                    slot_table.deleteRow(slot_table.rows.length-1);
+                }
+
+                if (response.slots.length){
+                    for (var i=0; i < response.slots.length; i++){
+                        var tr = document.createElement('TR');
+                        slot_table.appendChild(tr);
+                        var td = document.createElement('TD');
+                        h_m = (response.slots[i]).toFixed(2).toString().split(".");
+                        time_from = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                        time_to = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1])+30, 0, 0);
+                        time_from_db = time_from.getHours()+"."+time_from.getMinutes();
+                        time_to_db = time_to.getHours()+"."+time_to.getMinutes();
+                        td.appendChild(document.createTextNode(
+                            time_from.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + " - " + time_to.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+                        ));
+                        $(td).css({
+                            'cursor': 'pointer'
+                        });
+                        td.setAttribute("onclick","book_appointment('"+response.date+"', "+time_from_db+"," + time_to_db + ")");
+                        tr.appendChild(td);
+                    }
+                    $(slot_table).show();
+                }
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+        function book_appointment(dt, time_from, time_to){
+
+            data = {
+                        'dt': dt, 'time_from': time_from, 'time_to': time_to, 'patient_id': global_patient_id,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+            };
+            $.ajax({
+              url: "/book_appointment/",
+              type: "post", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log(response);
+                get_available_slots(response.dt);
+                global_alert("Appointment Booked. <br> Appointment ID: " + response.appointment_id, 2500);
+                appointments();
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+        function cancel_appointment(idappointments){
+            if(confirm("Sure you want to Cancel appointment")){
+                data = {
+                    'idappointments': idappointments,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                };
+                $.ajax({
+                  url: "/cancel_appointment/",
+                  type: "post", //send it through get method
+                  data: data,
+                  success: function(response) {
+                    console.log(response);
+                    appointments();
+                  },
+                  error: function(xhr) {
+                    console.log("error");
+                  }
+                });
+            }
+        }
+
+        function appointments(){
+            data = {
+                    'patient_id': global_patient_id,
+                    'username': '',
+                    'status':'',
+                    'date_from': '',
+                    'date_to':''
+            };
+            $.ajax({
+              url: "/get_appointments/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log(response);
+                if (response.data.length){
+                    var tbl = document.getElementById('appointment_history_tbl');
+                    document.getElementById("appointment_history_tbl").innerHTML='';
+                    for(var i=0; i<response.data.length; i++){
+                        tr = document.createElement('TR');
+                        tbl.appendChild(tr);
+                        td = document.createElement('TD');
+                        td.appendChild(document.createTextNode((new Date(response.data[i].dt.split('-')[0],parseInt(response.data[i].dt.split('-')[1])-1,response.data[i].dt.split('-')[2])).toDateString()));
+                        tr.appendChild(td);
+                        td = document.createElement('TD');
+                        h_m = (response.data[i].from_time).toFixed(2).toString().split(".");
+                        time_from = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                        h_m = (response.data[i].to_time).toFixed(2).toString().split(".");
+                        time_to = new Date(2022, 01, 01, h_m[0] , parseInt(h_m[1]), 0, 0);
+                        td.appendChild(document.createTextNode(time_from.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) + " - " + time_to.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })));
+                        tr.appendChild(td);
+                        td = document.createElement('TD');
+                        status = response.data[i].status;
+                        if (status == 'S') {
+                            status = 'Scheduled';
+                        }
+                        if (status == 'C') status = 'Cancelled';
+                        if (status == 'M') status = 'Missed';
+                        td.appendChild(document.createTextNode(status));
+                        if( response.data[i].status == 'S'){
+                            span = document.createElement('span');
+                            span.appendChild(document.createTextNode("x"));
+                            span.setAttribute("onclick", "cancel_appointment(" + response.data[i].idappointments + ")");
+                            span.setAttribute('style','cursor:pointer; margin:10px; color:red');
+                            td.appendChild(span);
+                        }
+                        tr.appendChild(td);
+                    }
+                }
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+    </script>
+
+    <h4>Appointments</h4>
+    <br>
+    <table id="patient_tbl" class="patient_info_tbl">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Chief Complaint</th>
+        </tr>
+        {% for patient in data %}
+        <tr>
+
+                <td>
+                    {{patient.idpatients}}
+                </td>
+                <td>
+                    {{patient.first_name}} {{patient.last_name}}
+                </td>
+                <td>
+                    {{patient.gender}}
+                </td>
+                <td>
+                    {{patient.phone}}
+                </td>
+                <td>
+                    {{patient.email}}
+                </td>
+                <td>
+                    {% if patient.address_line_1 != '' %}{{patient.address_line_1}}<br>{% endif %}
+                    {% if patient.address_line_2 != '' %}{{patient.address_line_2}}<br>{% endif %}
+                    {% if patient.address_line_3 != '' %}{{patient.address_line_3}}<br>{% endif %}
+                    {{patient.city}}, {{patient.state}}, {{patient.zip}}
+                </td>
+                <td>
+                    {{patient.history}}
+                </td>
+
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <div style="cursor:pointer" onclick="$('#appointment_history').toggle()">Appointment Details + </div>
+    <div id="appointment_history" style="display:none;">
+        <table id="appointment_history_tbl" class="rbstable">
+
+        </table>
+    </div>
+    <br>
+    <table class="rbstable">
+        <tr>
+            <td style="width:30%">Today</td>
+            <td><div id="available_today"></div> </td>
+        </tr>
+        <tr>
+            <td>Tomorrow</td>
+            <td><div id="available_tomorrow"></div> </td>
+        </tr>
+        <tr>
+            <td>Select Date</td>
+            <td>
+                <input class="pickadate" name="calendar" type="text">
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <table class="rbstable" id="slot_table" style="display:none">
+                    <tr><th>Choose Slot</th></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+
+{% endblock %}

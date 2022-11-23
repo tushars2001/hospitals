@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if request.GET.error %}
+    <p>{{request.GET.error}}</p>
+{% endif %}
+
+{% if status != 'unknown' %}
+    <!--{{status}}
+    {{error}}
+    {{data}}-->
+{% endif %}
+<script language="JavaScript">
+    $( function() {
+
+        $( "#datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',
+        shortYearCutoff: 1,
+        changeMonth: true,
+        changeYear: true,
+        minDate: "-99Y",
+         yearRange: "1900:2030"  });
+      } );
+</script>
+<div style="text-align:center">
+    {% if action == 'Edit' %}
+        <h2>Edit Patient Info </h2>
+        <h3>Patient ID: {{data.0.idpatients }} Updated</h3>
+    {% else %}
+        <h2>New Patient Registration </h2>
+        {% if data.0.idpatients %}<h3>Patient ID: {{data.0.idpatients }}</h3>{% endif %}
+    {% endif %}
+
+</div>
+<form name="addform" method="post" action="">
+    {% csrf_token %}
+    <input type="hidden" value="{{data.0.idpatients }}" name="idpatients">
+    <table class="rfstables">
+        <tr>
+            <td colspan="2">
+                <table><tr>
+                    <td style="text-align:left">First Name *</td>
+                    <td><input name="first_name" type="text" value="{{data.0.first_name}}"></td>
+                    <td style="text-align:left">Last Name</td>
+                    <td><input name="last_name" type="text" value="{{data.0.last_name}}"></td>
+                </tr></table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table >
+                    <tr>
+                        <td style="text-align:right">Gender &nbsp;</div></td>
+                        <td>
+                            <input type="radio" name="gender" value="Male" {% if data.0.gender == 'Male' %}Checked{% endif %}> Male &nbsp;&nbsp;
+                            <input type="radio" name="gender" value="Female" {% if data.0.gender == 'Female' %}Checked{% endif %}> Female
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:right">Age</td>
+                        <td><input name="age" type="text"  value="{{data.0.age}}"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:right">DoB</td>
+                        <td><input name="dob" type="text" id="datepicker" autocomplete="off" value="{{data.0.dob|date:'Y-m-d'}}"></td>
+                    </tr>
+                    <tr>
+                           <td style="text-align:right">Phone</td>
+                            <td><input name="phone" type="number" value="{{data.0.phone}}"></td>
+                    </tr>
+                    <tr>
+                           <td style="text-align:right">Email</td>
+                            <td><input name="email" type="email" value="{{data.0.email}}"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <table border="1">
+                    <tr>
+                        <td style="text-align:right">Address Line 1</td>
+                        <td><input name="address_line_1" value="{{data.0.address_line_1}}" type="text" style="width:500px"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:right">Address Line 2</td>
+                        <td><input name="address_line_2" value="{{data.0.address_line_2}}" type="text" style="width:500px"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:right">Address Line 3</td>
+                        <td><input name="address_line_3" value="{{data.0.address_line_3}}" type="text" style="width:500px"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <table>
+                                <tr>
+                                    <td style="text-align:right">City</td>
+                                    <td><input name="city" type="text" value="{{data.0.city}}"></td>
+                                    <td style="text-align:right">State</td>
+                                    <td><input name="state" type="text" value="{{data.0.state}}"></td>
+                                    <td style="text-align:right">Zip</td>
+                                    <td><input name="zip" type="number" value="{{data.0.zip}}"></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <table><tr>
+                    <td style="text-align:right">Chief Complaint</td><br>
+                    <td><textarea name="history" rows="5" cols="50">{{data.0.history}}</textarea></td>
+                </tr></table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="Submit" class="greenbuttons">
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock %}

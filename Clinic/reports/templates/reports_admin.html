@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% if request.GET.error %}
+    <p>{{request.GET.error}}</p>
+{% endif %}
+{% if status != 'unknown' %}
+    <!--{{status}}
+    {{error}}
+    {{data}}-->
+{% endif %}
+<h2>Reporting</h2>
+<h3><table class="rbstable">
+    <tr style="cursor:pointer" onclick="window.location='/reports/revenue/';"><td>Revenue<td><img src="{% static 'images/revenue.png' %}" style="height:150px;width:150px"></td></tr>
+    <tr style="cursor:pointer" onclick="window.location='/reports/expense/';"><td>Expense<td><img src="{% static 'images/expense.png' %}" style="height:150px;width:150px"></td></tr>
+    <tr style="cursor:pointer" onclick="window.location='/reports/profit-loss/';"><td>Profit-Loss<td><img src="{% static 'images/p_l.png' %}" style="height:150px;width:150px"></td></tr>
+    <tr style="cursor:pointer" onclick="window.location='/reports/patients/';"><td>Patients<td><img src="{% static 'images/patient.png' %}" style="height:150px;width:150px"></td></tr>
+</table></a></h3>
+{% endblock %}
