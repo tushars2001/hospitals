@@ -197,6 +197,7 @@ def get_visits_by_id(patient_id):
     `visits`.`idpatients`,
     `visits`.`visit_date`,
     `visits`.`notes`,
+    `visits`.`prescription`,
     `visits`.`idprescription`
 FROM `clinic`.`visits`
 where idpatients=%(patient_id)s
@@ -244,6 +245,7 @@ def get_prescription_by_visit(visit_id):
             `p`.`duration`,
             `p`.`quantity`,
             `p`.`notes`,
+            `p`.`prescription`,
             `p`.`cost`
         FROM `clinic`.`prescriptions` p, `clinic`.`medicins` m
         where p.idmedicins = m.idmedicins and p.idvisit=%(visit_id)s
@@ -351,6 +353,32 @@ def updateNotes(req):
         UPDATE `clinic`.`visits`
         SET
         `notes` = %(notes)s
+        WHERE `idvisits` = %(visit_id)s;
+        """
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql, fields)
+        data = cursor.fetchall()
+        cursor.close()
+
+    return fields
+
+
+def updatePrescription(req):
+    print(req)
+    fields = {}
+
+    if len(req['prescription']) > 0:
+        fields['prescription'] = req['prescription']
+    else:
+        fields['prescription'] = None
+
+    fields['visit_id'] = req['visit_id']
+
+    sql = """
+        UPDATE `clinic`.`visits`
+        SET
+        `prescription` = %(prescription)s
         WHERE `idvisits` = %(visit_id)s;
         """
 

@@ -91,29 +91,21 @@
                           tr.appendChild(td);
 
                           td = document.createElement('TD');
-                          td.setAttribute("valign","top");
-                          var toggle = document.createElement('span');
-                          toggle.setAttribute("id","rx_" + 'table_add_' + data.data[i].idvisits);
-                          toggle.appendChild(document.createTextNode("+ RX"));
-                          toggle.onclick = function(){
-                            console.log("Toggle");
-                            $("#table_add_" + this.id.split("_").slice(-1)).fadeToggle("fast");
+                          var prescription = document.createElement("textarea");
+                          prescription.setAttribute("id", "prescription_visit_" + data.data[i].idvisits);
+                          prescription.setAttribute("onblur", "update_prescription_for_visit("+data.data[i].idvisits+");");
+                          prescription.cols = 30;
+                          prescription.rows = 5;
+                          if (data.data[i].prescription != null)
+                            prescription.innerHTML = data.data[i].prescription;
+                          td.appendChild(prescription);
+                          var button = document.createElement("button");
+                          button.innerHTML = "Update";
+                          button.setAttribute('class', 'greenbuttons');
+                          button.setAttribute("onclick", "update_notes_for_visit("+data.data[i].idvisits+");");
+                          //td.appendChild(button);
+                          tr.appendChild(td);
 
-                          }
-                          td.appendChild(toggle);
-
-                          var print = document.createElement('span');
-                          print.setAttribute("id","print_" + 'table_add_' + data.data[i].idvisits);
-                          print.setAttribute("class","print_icon");
-                          //print.appendChild(document.createTextNode(" Print "));
-                          print.setAttribute("style", "margin:5px 5px 5px 5px");
-                          print.onclick = function(){
-                            console.log("print");
-                            //alert("printing.." + this.id.split("_").slice(-1) );
-                            window.open("/patient/print_prescription/?idvisits=" + this.id.split("_").slice(-1) + "&idpatients=" + global_patient_id, '_blank');
-
-                          }
-                          td.appendChild(print);
 
                            /* HIDDEN TBL FOR ADD */
                                 var table_add = document.createElement('TABLE');
@@ -124,6 +116,7 @@
                                 var th = document.createElement('TR');
                                 table_add.appendChild(th);
 
+                                /*
                                 var td_add = document.createElement('TH');
                                 td_add.appendChild(document.createTextNode("Item"));
                                 th.appendChild(td_add);
@@ -139,11 +132,11 @@
                                 td_add = document.createElement('TH');
                                 td_add.appendChild(document.createTextNode("Quantity"));
                                 th.appendChild(td_add);
-
+                                */
                                 td_add = document.createElement('TH');
-                                td_add.appendChild(document.createTextNode("Notes"));
+                                td_add.appendChild(document.createTextNode("Prescriptions"));
                                 th.appendChild(td_add);
-
+                                /*
                                 td_add = document.createElement('TH');
                                 td_add.appendChild(document.createTextNode("Cost"));
                                 th.appendChild(td_add);
@@ -151,10 +144,10 @@
                                 td_add = document.createElement('TH');
                                 td_add.appendChild(document.createTextNode(""));
                                 th.appendChild(td_add);
-
+                                */
                                 var tr_add = document.createElement('TR');
                                 table_add.appendChild(tr_add);
-
+                                /*
                                 var td_add = document.createElement('TD');
                                 var input = document.createElement('input');
                                 input.setAttribute("type","text");
@@ -218,14 +211,14 @@
                                 input.setAttribute("name","quantity");
                                 td_add.appendChild(input);
                                 tr_add.appendChild(td_add);
-
+                                */
                                 td_add = document.createElement('TD');
                                 input = document.createElement('input');
                                 input.setAttribute("type","text");
                                 input.setAttribute("name","notes");
                                 td_add.appendChild(input);
                                 tr_add.appendChild(td_add);
-
+                                /*
                                 td_add = document.createElement('TD');
                                 input = document.createElement('input');
                                 input.setAttribute("type","text");
@@ -242,13 +235,15 @@
                                 input.setAttribute("onclick", "add_rx_for_visit("+data.data[i].idvisits+");");
                                 td_add.appendChild(input);
                                 tr_add.appendChild(td_add);
+                                */
                                 td.appendChild(table_add);
+
                             /* ********************* */
 
                           var prescription = document.createElement("div");
                           prescription.setAttribute("id", "prescription_visit_" + data.data[i].idvisits);
                           td.appendChild(prescription);
-                          getPrescription(data.data[i].idvisits);
+                          //getPrescription(data.data[i].idvisits);
                           tr.appendChild(td);
                       }
                       myTableDiv.appendChild(table);
@@ -393,7 +388,7 @@
               success: function(response) {
                 console.log("success");
                 console.log(response);
-                getPrescription(response.data.visit_id);
+                //getPrescription(response.data.visit_id);
                 $("#table_add_" + response.data.visit_id + " input").each(function(){
                     this.value='';
                 });
@@ -423,7 +418,7 @@
               success: function(response) {
                 console.log("success");
                 console.log(response);
-                getPrescription(response.data.idvisit);
+                //getPrescription(response.data.idvisit);
                 //$("#table_add_" + response.data.visit_id + " input").each(function(){
                 //    this.value='';
                 //});
@@ -447,6 +442,25 @@
               success: function(response) {
                 console.log("success");
                 global_alert("Notes Updated.",1000)
+              },
+              error: function(xhr) {
+                console.log("error");
+              }
+            });
+        }
+
+        function update_prescription_for_visit(visit_id){
+            console.log("updating prescription");
+            data = {
+                    'visit_id': visit_id, 'prescription': document.getElementById('prescription_visit_'+visit_id).value
+            };
+            $.ajax({
+              url: "/patient/visits/updatePrescription/",
+              type: "get", //send it through get method
+              data: data,
+              success: function(response) {
+                console.log("success");
+                global_alert("prescription Updated.",1000)
               },
               error: function(xhr) {
                 console.log("error");
@@ -543,6 +557,10 @@
 
         $(function(){
             getVisits({{data.0.idpatients}});
+            {% if new == 1 %}
+                console.log("Adding first visit");
+                add_new_visit(global_patient_id);
+            {% endif %}
         });
 
         function blink_text() {

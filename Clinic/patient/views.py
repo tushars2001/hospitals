@@ -113,7 +113,7 @@ def add(request):
                 patient_id = models.add(fields)
                 res['status'] = 'Success'
                 res['action'] = "Add"
-                response = redirect("/patient/search/?patient_id=" + str(patient_id))
+                response = redirect("/patient/search/?new=1&patient_id=" + str(patient_id))
                 return response
 
             res['data'] = models.get_patient_by_id(patient_id)
@@ -139,6 +139,8 @@ def get_patient_by_id(request):
     else:
         if 'patient_id' in request.GET and request.GET['patient_id'].isdigit():
             res['data'] = models.get_patient_by_id(request.GET['patient_id'])
+            if 'new' in request.GET and request.GET['new']:
+                res['new'] = 1
         else:
             res['error'] = 'Invalid Data provided.'
 
@@ -181,7 +183,7 @@ def prescription(request):
         res['data'] = models.get_prescription_by_visit(request.GET['visit_id'])
     else:
         res['error'] = 'Invalid Data provided.'
-
+    pdb.set_trace()
     return JsonResponse(res)
 
 
@@ -221,6 +223,16 @@ def updateNotes(request):
     res = {'status': 'success', 'error': '', 'data': {}}
     if 'visit_id' in request.GET and request.GET['visit_id'].isdigit():
         res['data'] = models.updateNotes(request.GET)
+    else:
+        res['error'] = 'Invalid Data provided.'
+
+    return JsonResponse(res)
+
+
+def updatePrescription(request):
+    res = {'status': 'success', 'error': '', 'data': {}}
+    if 'visit_id' in request.GET and request.GET['visit_id'].isdigit():
+        res['data'] = models.updatePrescription(request.GET)
     else:
         res['error'] = 'Invalid Data provided.'
 
